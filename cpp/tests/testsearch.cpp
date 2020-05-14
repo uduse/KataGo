@@ -1168,7 +1168,34 @@ void Tests::runSearchTestsV8(const string& modelFile, bool inputsNHWC, bool cuda
   NeuralNet::globalCleanup();
 }
 
+void Tests::runMMCTSTests(const string &modelFile, bool inputsNHWC, bool cudaNHWC, bool useFP16) {
+  cout << "Running MMCTS tests" << endl;
+  NeuralNet::globalInitialize();
 
+  Logger logger;
+  logger.setLogToStdout(true);
+  logger.setLogTime(false);
+
+  NNEvaluator *nnEval = startNNEval(
+      modelFile,
+      logger,
+      "",
+      NNPos::MAX_BOARD_LEN,
+      NNPos::MAX_BOARD_LEN,
+      -1,
+      inputsNHWC,
+      cudaNHWC,
+      useFP16,
+      false,
+      false
+  );
+
+  runBasicPositions(nnEval, logger);
+//  nnEval->evaluate(board,hist,nextPla,nnInputParams,buf,skipCache,includeOwnerMap);
+  delete nnEval;
+
+  NeuralNet::globalCleanup();
+}
 
 void Tests::runNNLessSearchTests() {
   cout << "Running neuralnetless search tests" << endl;

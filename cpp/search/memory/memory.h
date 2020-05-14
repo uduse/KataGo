@@ -20,7 +20,7 @@ typedef multi_index_container<
     MemoryEntry,
     indexed_by<
         // index 0, unique by id_, used to constant time lookup
-        hashed_unique<member<MemoryEntry, uint64_t, &MemoryEntry::id_>>,
+        hashed_unique<member<MemoryEntry, EntryID, &MemoryEntry::id_>>,
 
         // index 1, ordered by touch stamp, used to kick outdated entries
         ordered_non_unique<member<MemoryEntry, uint64_t, &MemoryEntry::touch_stamp_>, std::less<>>
@@ -37,12 +37,12 @@ class Memory {
       std::unique_ptr<Aggregator> &aggregator_ptr
   );
 
-  void Update(const uint64_t &id, const FeatureVector &vec);
+  void Update(const EntryID &id, const FeatureVector &vec);
   FeatureVector Query(const FeatureVector &target);
   void Build();
-  void TouchEntriesByIDs(const vector<uint64_t> &nn_ids);
+  void TouchEntriesByIDs(const vector<EntryID> &nn_ids);
 
-  [[nodiscard]] std::vector<FeatureVector> GetFeatureVectors(const std::vector<uint64_t> &ids) const;
+  [[nodiscard]] std::vector<FeatureVector> GetFeatureVectors(const std::vector<EntryID> &ids) const;
   [[nodiscard]] std::string ToString() const;
 
  private:

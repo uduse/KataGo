@@ -4,9 +4,9 @@
 
 class MemoryEntry {
  public:
-  MemoryEntry(const uint64_t &id, FeatureVector vec, const uint64_t &touch_stamp);
+  MemoryEntry(const EntryID &id, FeatureVector vec, const uint64_t &touch_stamp);
 
-  uint64_t id_;
+  EntryID id_;
   uint64_t touch_stamp_;
   FeatureVector vec_;
 

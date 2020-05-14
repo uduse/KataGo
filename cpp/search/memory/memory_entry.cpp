@@ -5,7 +5,7 @@
 #include "memory_entry.h"
 
 MemoryEntry::MemoryEntry(
-    const uint64_t &id,
+    const EntryID &id,
     FeatureVector vec,
     const uint64_t &touch_stamp
 )

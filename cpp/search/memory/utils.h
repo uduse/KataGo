@@ -11,8 +11,9 @@
 #include "../../../../annoy/src/kissrandom.h"
 #include "../../../../annoy/src/annoylib.h"
 
+typedef int32_t EntryID;
 typedef std::vector<double> FeatureVector;
-typedef AnnoyIndex<uint64_t, double, Angular, Kiss32Random> IndexType;
+typedef AnnoyIndex<EntryID, double, Angular, Kiss32Random> IndexType;
 typedef std::unique_ptr<IndexType> AnnoyPtr;
 
 namespace utils {
@@ -22,6 +23,5 @@ std::string ToString(const FeatureVector &vector);
 std::string ToString(const std::vector<uint64_t> &vector);
 std::vector<double> Softmax(const std::vector<double> &vector);
 std::function<double()> GetRandomDoubleFactory();
-
 
 }

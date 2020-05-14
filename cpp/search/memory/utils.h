@@ -12,15 +12,16 @@
 #include "../../../../annoy/src/annoylib.h"
 
 typedef std::vector<double> FeatureVector;
-typedef AnnoyIndex<int, double, Angular, Kiss32Random> IndexType;
+typedef AnnoyIndex<uint64_t, double, Angular, Kiss32Random> IndexType;
 typedef std::unique_ptr<IndexType> AnnoyPtr;
 
 namespace utils {
 
 void TimeIt(const std::function<void()> &func, const std::string &desc = "Time");
 std::string ToString(const FeatureVector &vector);
-std::string ToString(const std::vector<int> &vector);
+std::string ToString(const std::vector<uint64_t> &vector);
 std::vector<double> Softmax(const std::vector<double> &vector);
 std::function<double()> GetRandomDoubleFactory();
+
 
 }

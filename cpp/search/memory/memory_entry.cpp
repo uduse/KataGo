@@ -5,9 +5,9 @@
 #include "memory_entry.h"
 
 MemoryEntry::MemoryEntry(
-    const unsigned int &id,
+    const uint64_t &id,
     FeatureVector vec,
-    const unsigned int &touch_stamp
+    const uint64_t &touch_stamp
 )
     : id_{id},
       vec_{std::move(vec)},

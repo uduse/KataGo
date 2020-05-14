@@ -4,10 +4,10 @@
 
 class MemoryEntry {
  public:
-  MemoryEntry(const unsigned int &id, FeatureVector vec, const unsigned int &touch_stamp);
+  MemoryEntry(const uint64_t &id, FeatureVector vec, const uint64_t &touch_stamp);
 
-  unsigned int id_;
-  unsigned int touch_stamp_;
+  uint64_t id_;
+  uint64_t touch_stamp_;
   FeatureVector vec_;
 
   [[nodiscard]] std::string ToString() const;

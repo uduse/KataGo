@@ -10,8 +10,6 @@
 #include <boost/multi_index/identity.hpp>
 #include <boost/multi_index/member.hpp>
 
-#include "spdlog/spdlog.h"
-#include "spdlog/sinks/basic_file_sink.h"
 #include "utils.h"
 #include "memory_entry.h"
 #include "aggregator.h"
@@ -22,40 +20,40 @@ typedef multi_index_container<
     MemoryEntry,
     indexed_by<
         // index 0, unique by id_, used to constant time lookup
-        hashed_unique<member<MemoryEntry, unsigned int, &MemoryEntry::id_>>,
+        hashed_unique<member<MemoryEntry, uint64_t, &MemoryEntry::id_>>,
 
         // index 1, ordered by touch stamp, used to kick outdated entries
-        ordered_non_unique<member<MemoryEntry, unsigned int, &MemoryEntry::touch_stamp_>, std::less<>>
+        ordered_non_unique<member<MemoryEntry, uint64_t, &MemoryEntry::touch_stamp_>, std::less<>>
     >
 > EntryContainer;
 
 class Memory {
  public:
   Memory(
-      const int &feature_dim,
-      const int &memory_size,
-      const int &num_trees,
-      const int &num_neighbors,
+      const uint64_t &feature_dim,
+      const uint64_t &memory_size,
+      const uint64_t &num_trees,
+      const uint64_t &num_neighbors,
       std::unique_ptr<Aggregator> &aggregator_ptr
   );
 
-  void Update(const unsigned int &id, const FeatureVector &vec);
+  void Update(const uint64_t &id, const FeatureVector &vec);
   FeatureVector Query(const FeatureVector &target);
   void Build();
-  void TouchEntriesByIDs(const vector<int> &nn_ids);
+  void TouchEntriesByIDs(const vector<uint64_t> &nn_ids);
 
-  [[nodiscard]] std::vector<FeatureVector> GetFeatureVectors(const std::vector<int> &ids) const;
+  [[nodiscard]] std::vector<FeatureVector> GetFeatureVectors(const std::vector<uint64_t> &ids) const;
   [[nodiscard]] std::string ToString() const;
 
  private:
-  const int feature_dim_;
-  const int memory_size_;
-  const int num_trees_;
-  const int num_neighbors_;
+  const uint64_t feature_dim_;
+  const uint64_t memory_size_;
+  const uint64_t num_trees_;
+  const uint64_t num_neighbors_;
 
   EntryContainer entries_;
   std::unique_ptr<Aggregator> aggregator_ptr_;
-  unsigned int touch_counter_;
+  uint64_t touch_counter_;
   AnnoyPtr annoy_ptr_;
   bool annoy_outdated_;
 };

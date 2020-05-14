@@ -6,10 +6,10 @@
 #include "memory.h"
 
 Memory::Memory(
-    const int &feature_dim,
-    const int &memory_size,
-    const int &num_trees,
-    const int &num_neighbors,
+    const uint64_t &feature_dim,
+    const uint64_t &memory_size,
+    const uint64_t &num_trees,
+    const uint64_t &num_neighbors,
     std::unique_ptr<Aggregator> &aggregator_ptr
 )
     : feature_dim_{feature_dim},
@@ -22,7 +22,7 @@ Memory::Memory(
       touch_counter_{0},
       aggregator_ptr_{std::move(aggregator_ptr)} {}
 
-void Memory::Update(const unsigned int &id, const FeatureVector &vec) {
+void Memory::Update(const unsigned uint64_t &id, const FeatureVector &vec) {
   MemoryEntry entry{id, vec, touch_counter_++};
   auto &index_by_id = entries_.get<0>();
   auto found = index_by_id.find(id);
@@ -33,7 +33,6 @@ void Memory::Update(const unsigned int &id, const FeatureVector &vec) {
     if (entries_.size() > memory_size_) {
       auto &index_by_touch_stamp = entries_.get<1>();
       auto target = index_by_touch_stamp.begin();
-      spdlog::debug("Erasing: {}", target->ToString());
       index_by_touch_stamp.erase(target);
     }
     annoy_outdated_ = true;
@@ -46,7 +45,7 @@ FeatureVector Memory::Query(const FeatureVector &target) {
     annoy_outdated_ = false;
   }
 
-  std::vector<int> nn_ids;
+  std::vector<uint64_t> nn_ids;
   std::vector<double> distances;
 
   annoy_ptr_->get_nns_by_vector(target.data(), num_neighbors_, -1, &nn_ids, &distances);
@@ -55,14 +54,10 @@ FeatureVector Memory::Query(const FeatureVector &target) {
   auto result = aggregator_ptr_->Aggregate(vectors, distances);
   TouchEntriesByIDs(nn_ids);
 
-  spdlog::debug("Neighbor IDs: {}", utils::ToString(nn_ids));
-  spdlog::debug("Distances: {}", utils::ToString(distances));
-  spdlog::debug("Aggregated Result: {}", utils::ToString(result));
-
   return result;
 }
 
-void Memory::TouchEntriesByIDs(const vector<int> &nn_ids) {
+void Memory::TouchEntriesByIDs(const vector<uint64_t> &nn_ids) {
   auto &index_by_id = this->entries_.get<0>();
   for (auto &id : nn_ids) {
     auto found = index_by_id.find(id);
@@ -85,7 +80,7 @@ void Memory::Build() {
   annoy_ptr_->build(num_trees_);
 }
 
-std::vector<FeatureVector> Memory::GetFeatureVectors(const std::vector<int> &ids) const {
+std::vector<FeatureVector> Memory::GetFeatureVectors(const std::vector<uint64_t> &ids) const {
   std::vector<FeatureVector> results;
 
   auto &index_by_id = entries_.get<0>();

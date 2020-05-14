@@ -6,16 +6,12 @@
 
 #include <boost/algorithm/string/join.hpp>
 
-#include "spdlog/sinks/basic_file_sink.h"
-#include "spdlog/spdlog.h"
-
 void utils::TimeIt(const std::function<void()> &func, const std::string &desc) {
   std::chrono::high_resolution_clock::time_point t_start, t_end;
   t_start = std::chrono::high_resolution_clock::now();
   func();
   t_end = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
-  spdlog::info("{0}: {1} (ms).", desc, duration);
 }
 
 std::string utils::ToString(const FeatureVector &vector) {
@@ -30,13 +26,13 @@ std::string utils::ToString(const FeatureVector &vector) {
   return "[" + boost::algorithm::join(strings, ", ") + "]";
 }
 
-std::string utils::ToString(const std::vector<int> &vector) {
+std::string utils::ToString(const std::vector<uint64_t> &vector) {
   std::vector<std::string> strings;
   std::transform(
       vector.begin(),
       vector.end(),
       std::back_inserter(strings),
-      [](const int &val) {
+      [](const uint64_t &val) {
         return std::to_string(val);
       });
   return "<" + boost::algorithm::join(strings, ", ") + ">";

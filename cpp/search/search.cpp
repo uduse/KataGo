@@ -174,6 +174,14 @@ Search::Search(SearchParams params, NNEvaluator* nnEval, const string& rSeed)
 
   rootHistory.clear(rootBoard,rootPla,Rules(),0);
   rootKoHashTable->recompute(rootHistory);
+
+  const uint64_t featureDim = Board::MAX_ARR_SIZE * 4;
+  const uint64_t memorySize = 512;
+  const uint64_t numTrees = 128;
+  const uint64_t numNeighbors = 8;
+
+  std::unique_ptr<Aggregator> aggregatorPtr = std::make_unique<AverageAggregator>();
+  memoryPtr = std::make_unique<Memory>(featureDim, memorySize, numTrees, numNeighbors, aggregatorPtr);
 }
 
 Search::~Search() {
@@ -793,6 +801,9 @@ void Search::computeRootValues() {
         nnResultBuf, skipCache, includeOwnerMap
       );
       expectedScore = nnResultBuf.result->whiteScoreMean;
+//      const vector<uint8_t> &oneHotFeatureVector = board.toOneHotFeatureVector();
+//      const FeatureVector vector(oneHotFeatureVector.begin(), oneHotFeatureVector.end());
+//      double memoryValue = memoryPtr->Query(vector);
     }
 
     recentScoreCenter = expectedScore * (1.0 - searchParams.dynamicScoreCenterZeroWeight);

@@ -6,15 +6,19 @@
 
 MemoryEntry::MemoryEntry(
     const EntryID &id,
-    FeatureVector vec,
-    const uint64_t &touch_stamp
+    const uint64_t &touchStamp,
+    FeatureVector featureVector,
+    const double &value,
+    const uint64_t &numVisits
 )
-    : id_{id},
-      vec_{std::move(vec)},
-      touch_stamp_{touch_stamp} {}
+    : id{id},
+      featureVector{std::move(featureVector)},
+      touchStamp{touchStamp},
+      value{value},
+      numVisits{numVisits} {}
 
 std::string MemoryEntry::ToString() const {
-  return "Entry #" + std::to_string(id_) + " (" + std::to_string(touch_stamp_)
-      + "): " + utils::ToString(vec_);
+  return "Entry #" + std::to_string(id) + " (" + std::to_string(touchStamp)
+      + "): " + utils::ToString(featureVector);
 }
 

@@ -5,40 +5,26 @@
 #include <numeric>
 #include "aggregator.h"
 
-std::vector<double> Aggregator::Aggregate(
-    const std::vector<FeatureVector> &vectors,
+double Aggregator::Aggregate(
+    const std::vector<std::shared_ptr<MemoryEntry>> &entries,
     const std::vector<double> &distances
 ) const {
-  return std::vector<double>();
+  return 0;
 }
 
-std::vector<double> AverageAggregator::Aggregate(
-    const std::vector<FeatureVector> &vectors,
+double AverageAggregator::Aggregate(
+    const std::vector<std::shared_ptr<MemoryEntry>> &entries,
     const std::vector<double> &distances
 ) const {
-  std::vector<std::valarray<double>> val_arrays;
-
-  // transpose
-  std::transform(
-      vectors.begin(), vectors.end(), std::back_inserter(val_arrays),
-      [](const auto &vector) {
-        return std::valarray<double>(vector.data(), vector.size());
-      }
-  );
-  std::valarray<double> zero = std::valarray<double>(double{0}, val_arrays[0].size());
-  std::valarray<double> sums = std::accumulate(
-      val_arrays.begin(), val_arrays.end(), zero
-  );
-  std::valarray<double> average = sums / static_cast<double>(vectors.size());
-  std::vector<double> result;
-  for (const auto &val : average) {
-    result.push_back(val);
+  double valueSum = 0;
+  for (const auto &entry : entries) {
+    valueSum += entry->value;
   }
-  return result;
+  return valueSum / entries.size();
 }
 
-std::vector<double> WeightedAverageAggregator::Aggregate(
-    const std::vector<FeatureVector> &vectors,
+double WeightedAverageAggregator::Aggregate(
+    const std::vector<std::shared_ptr<MemoryEntry>> &entries,
     const std::vector<double> &distances
 ) const {
   std::vector<double> norm_weights;
@@ -64,13 +50,13 @@ std::vector<double> WeightedAverageAggregator::Aggregate(
   );
 
   // TODO: implement
-  return std::vector<double>();
+  return 0;
 }
 
-std::vector<double> WeightedSoftmaxAggregator::Aggregate(
-    const std::vector<FeatureVector> &vectors,
+double WeightedSoftmaxAggregator::Aggregate(
+    const std::vector<std::shared_ptr<MemoryEntry>> &entries,
     const std::vector<double> &distances
 ) const {
   // TODO: implement
-  return std::vector<double>();
+  return 0;
 }

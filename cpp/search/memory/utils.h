@@ -8,8 +8,8 @@
 #include <memory>
 #include <functional>
 
-#include "../../annoy/src/kissrandom.h"
-#include "../../annoy/src/annoylib.h"
+#include "../../../../annoy/src/kissrandom.h"
+#include "../../../../annoy/src/annoylib.h"
 
 typedef std::vector<double> FeatureVector;
 typedef AnnoyIndex<int, double, Angular, Kiss32Random> IndexType;

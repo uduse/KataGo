@@ -162,6 +162,14 @@ add_executable(katago
   search/asyncbot.cpp
   search/distributiontable.cpp
   search/analysisdata.cpp
+  search/memory/utils.h
+  search/memory/utils.cpp
+  search/memory/memory_entry.h
+  search/memory/memory_entry.cpp
+  search/memory/aggregator.h
+  search/memory/aggregator.cpp
+  search/memory/memory.h
+  search/memory/memory.cpp
   program/gtpconfig.cpp
   program/setup.cpp
   program/playutils.cpp

@@ -242,6 +242,8 @@ struct Board
   //Run some basic sanity checks on the board state, throws an exception if not consistent, for testing/debugging
   void checkConsistency() const;
 
+  std::vector<uint8_t> toOneHotFeatureVector() const;
+
   static Board parseBoard(int xSize, int ySize, const std::string& s);
   static Board parseBoard(int xSize, int ySize, const std::string& s, char lineDelimiter);
   static void printBoard(std::ostream& out, const Board& board, Loc markLoc, const std::vector<Move>* hist);

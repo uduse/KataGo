@@ -19,6 +19,6 @@ MemoryEntry::MemoryEntry(
 
 std::string MemoryEntry::ToString() const {
   return "Entry #" + std::to_string(id) + " (" + std::to_string(touchStamp)
-      + "): " + utils::ToString(featureVector);
+      + "): " + utils::toString(featureVector);
 }
 

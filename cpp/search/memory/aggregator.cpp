@@ -16,47 +16,39 @@ double AverageAggregator::Aggregate(
     const std::vector<std::shared_ptr<MemoryEntry>> &entries,
     const std::vector<double> &distances
 ) const {
-  double valueSum = 0;
+  double result = 0;
   for (const auto &entry : entries) {
-    valueSum += entry->value;
+    result += entry->value;
   }
-  return valueSum / entries.size();
+  return result / entries.size();
 }
 
 double WeightedAverageAggregator::Aggregate(
     const std::vector<std::shared_ptr<MemoryEntry>> &entries,
     const std::vector<double> &distances
 ) const {
-  std::vector<double> norm_weights;
-  double min = *std::min_element(distances.begin(), distances.end());
-  double max = *std::max_element(distances.begin(), distances.end());
-  double range = max - min;
-
-  // squash to [0, 1] range
-  std::transform(
-      distances.begin(), distances.end(), std::back_inserter(norm_weights),
-      [&](const auto &val) {
-        return (val - min) / range;
-      }
-  );
-
-  // normalize sum to 1
-  double sum = std::accumulate(norm_weights.begin(), norm_weights.end(), double{0});
-  std::transform(
-      norm_weights.begin(), norm_weights.end(), norm_weights.begin(),
-      [&](const auto &val) {
-        return val / sum;
-      }
-  );
-
-  // TODO: implement
-  return 0;
+  double distSum = 0;
+  for (const auto &dist : distances) {
+    distSum += dist;
+  }
+  double result = 0;
+  for (size_t i = 0; i < entries.size(); i++) {
+    result += entries[i]->value * (distances[i] / distSum);
+  }
+  assert(0.0 <= result && result <= 1.0);
+  return result;
 }
 
 double WeightedSoftmaxAggregator::Aggregate(
     const std::vector<std::shared_ptr<MemoryEntry>> &entries,
     const std::vector<double> &distances
 ) const {
-  // TODO: implement
-  return 0;
+  auto weights = utils::softmax(distances);
+  assert(entries.size() == weights.size());
+  double result = 0;
+  for (size_t i = 0; i < entries.size(); i++) {
+    result += weights[i] * entries[i]->value;
+  }
+  assert(0.0 <= result && result <= 1.0);
+  return result;
 }

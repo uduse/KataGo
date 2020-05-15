@@ -6,7 +6,7 @@
 
 #include <boost/algorithm/string/join.hpp>
 
-void utils::TimeIt(const std::function<void()> &func, const std::string &desc) {
+void utils::timeIt(const std::function<void()> &func, const std::string &desc) {
   std::chrono::high_resolution_clock::time_point t_start, t_end;
   t_start = std::chrono::high_resolution_clock::now();
   func();
@@ -14,7 +14,7 @@ void utils::TimeIt(const std::function<void()> &func, const std::string &desc) {
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
 }
 
-std::string utils::ToString(const FeatureVector &vector) {
+std::string utils::toString(const FeatureVector &vector) {
   std::vector<std::string> strings;
   std::transform(
       std::begin(vector),
@@ -38,7 +38,7 @@ std::string utils::ToString(const std::vector<uint64_t> &vector) {
   return "<" + boost::algorithm::join(strings, ", ") + ">";
 }
 
-std::vector<double> utils::Softmax(const std::vector<double> &vector) {
+std::vector<double> utils::softmax(const std::vector<double> &vector) {
   std::vector<double> exps;
   std::transform(
       vector.begin(), vector.end(), std::back_inserter(exps),

@@ -18,10 +18,10 @@ typedef std::unique_ptr<IndexType> AnnoyPtr;
 
 namespace utils {
 
-void TimeIt(const std::function<void()> &func, const std::string &desc = "Time");
-std::string ToString(const FeatureVector &vector);
+void timeIt(const std::function<void()> &func, const std::string &desc = "Time");
+std::string toString(const FeatureVector &vector);
 std::string ToString(const std::vector<uint64_t> &vector);
-std::vector<double> Softmax(const std::vector<double> &vector);
+std::vector<double> softmax(const std::vector<double> &vector);
 std::function<double()> GetRandomDoubleFactory();
 
 }

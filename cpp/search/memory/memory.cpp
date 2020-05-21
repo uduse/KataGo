@@ -23,19 +23,20 @@ Memory::Memory(
 	  aggregatorPtr{std::move(aggregator_ptr)} {}
 
 void Memory::update(
-	const EntryID &id,
-	const FeatureVector &featureVector,
-	const double &value,
-	const uint64_t &numVisits
+    const Hash128 &hash,
+    const FeatureVector &featureVector,
+    const double &value,
+    const uint64_t &numVisits
 ) {
   assert(featureVector.size()==featureDim);
 
+  EntryID id = getID(hash);
   MemoryEntry entry(
-	  id,
-	  touchCounter++,
-	  featureVector,
-	  value,
-	  numVisits
+      id,
+      touchCounter++,
+      featureVector,
+      value,
+      numVisits
   );
 
   auto &index_by_id = entries.get<0>();
@@ -68,17 +69,17 @@ std::pair<double, int> Memory::query(const FeatureVector &target) {
   return result;
 }
 
-void Memory::TouchEntriesByIDs(const vector<EntryID> &nn_ids) {
+void Memory::touchEntriesByIDs(const vector<EntryID> &nn_ids) {
   auto &index_by_id = this->entries.get<0>();
   for (auto &id : nn_ids) {
-	auto found = index_by_id.find(id);
-	auto touch_counter = this->touchCounter++;
-	index_by_id.modify(
-		found,
-		[&touch_counter](auto &entry) {
-		  entry.touchStamp = touch_counter;
-		}
-	);
+    auto found = index_by_id.find(id);
+    auto touch_counter = this->touchCounter++;
+    index_by_id.modify(
+        found,
+        [&touch_counter](auto &entry) {
+          entry.touchStamp = touch_counter;
+        }
+    );
   }
 }
 
@@ -104,15 +105,38 @@ Memory::GetEntriesByIDs(const std::vector<EntryID> &ids) const {
   return results;
 }
 
-std::string Memory::ToString() const {
+std::string Memory::toString() const {
   std::vector<std::string> strings;
   auto &index_by_id = entries.get<0>();
   for (const auto &entry : index_by_id) {
-	strings.push_back(entry.toString());
+    strings.push_back(entry.toString());
   }
   return boost::algorithm::join(strings, "\n");
 }
 
 bool Memory::isFull() const {
-  return entries.size()==memorySize;
+  return entries.size() == memorySize;
+}
+
+bool Memory::hasHash(const Hash128 &hash) {
+  auto id = getID(hash);
+  auto &index_by_id = entries.get<0>();
+  auto found = index_by_id.find(id);
+  return found != index_by_id.end();
+}
+
+size_t Memory::size() const {
+  return entries.size();
+}
+
+EntryID Memory::getID(const Hash128 &hash) {
+  auto xorHash = hash.hash0 ^hash.hash1;
+  auto found = idMap.find(xorHash);
+  if (found != idMap.end()) {
+    return found->second;
+  } else {
+    EntryID id = static_cast<EntryID>(idMap.size());
+    idMap.emplace(std::make_pair(xorHash, id));
+    return id;
+  }
 }

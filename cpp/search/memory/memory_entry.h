@@ -20,7 +20,7 @@ public:
   double value;
   uint64_t numVisits;
 
-  [[nodiscard]] std::string ToString() const;
+  [[nodiscard]] std::string toString() const;
 };
 
 //typedef std::unique_ptr<MemoryEntry> MemoryEntryPtr;

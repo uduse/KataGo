@@ -22,13 +22,13 @@ Memory::Memory(
 	  touchCounter{0},
 	  aggregatorPtr{std::move(aggregator_ptr)} {}
 
-void Memory::Update(
+void Memory::update(
 	const EntryID &id,
 	const FeatureVector &featureVector,
 	const double &value,
 	const uint64_t &numVisits
 ) {
-  assert(featureVector.size() == featureDim);
+  assert(featureVector.size()==featureDim);
 
   MemoryEntry entry(
 	  id,
@@ -53,9 +53,9 @@ void Memory::Update(
   }
 }
 
-double Memory::Query(const FeatureVector &target) {
+std::pair<double, int> Memory::query(const FeatureVector &target) {
   if (annoyOutDated) {
-	Build();
+	build();
 	annoyOutDated = false;
   }
 
@@ -82,8 +82,8 @@ void Memory::TouchEntriesByIDs(const vector<EntryID> &nn_ids) {
   }
 }
 
-void Memory::Build() {
-  assert(entries.size() > 0);
+void Memory::build() {
+  assert(!entries.empty());
   annoyPtr = std::move(std::make_unique<IndexType>(featureDim));
   auto &index_by_id = entries.get<0>();
   for (auto &entry : index_by_id) {
@@ -92,7 +92,7 @@ void Memory::Build() {
   annoyPtr->build(numTrees);
 }
 
-const std::vector<std::shared_ptr<MemoryEntry>>
+std::vector<std::shared_ptr<MemoryEntry>>
 Memory::GetEntriesByIDs(const std::vector<EntryID> &ids) const {
   std::vector<std::shared_ptr<MemoryEntry>> results;
 
@@ -108,7 +108,11 @@ std::string Memory::ToString() const {
   std::vector<std::string> strings;
   auto &index_by_id = entries.get<0>();
   for (const auto &entry : index_by_id) {
-    strings.push_back(entry.ToString());
+	strings.push_back(entry.toString());
   }
   return boost::algorithm::join(strings, "\n");
+}
+
+bool Memory::isFull() const {
+  return entries.size()==memorySize;
 }

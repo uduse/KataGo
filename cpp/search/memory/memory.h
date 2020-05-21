@@ -37,13 +37,12 @@ public:
       std::unique_ptr<Aggregator> &aggregator_ptr
   );
 
-  void Update(const EntryID &id, const FeatureVector &featureVector, const double &value, const uint64_t &numVisits);
-//  FeatureVector Query(const FeatureVector &target);
-  double Query(const FeatureVector &target);
-  void Build();
+  void update(const EntryID &id, const FeatureVector &featureVector, const double &value, const uint64_t &numVisits);
+  std::pair<double, int> query(const FeatureVector &target);
+  void build();
   void TouchEntriesByIDs(const vector<EntryID> &nn_ids);
-
-  [[nodiscard]] const std::vector<std::shared_ptr<MemoryEntry>> GetEntriesByIDs(const std::vector<EntryID> &ids) const;
+  bool isFull() const;
+  [[nodiscard]] std::vector<std::shared_ptr<MemoryEntry>> GetEntriesByIDs(const std::vector<EntryID> &ids) const;
   [[nodiscard]] std::string ToString() const;
 
 private:

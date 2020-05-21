@@ -176,9 +176,9 @@ Search::Search(SearchParams params, NNEvaluator* nnEval, const string& rSeed)
   rootKoHashTable->recompute(rootHistory);
 
   const uint64_t featureDim = Board::MAX_ARR_SIZE * 4;
-  const uint64_t memorySize = 512;
-  const uint64_t numTrees = 128;
-  const uint64_t numNeighbors = 8;
+  const uint64_t memorySize = 5000;
+  const uint64_t numTrees = 100;
+  const uint64_t numNeighbors = 10;
 
   std::unique_ptr<Aggregator> aggregatorPtr = std::make_unique<AverageAggregator>();
   memoryPtr = std::make_unique<Memory>(featureDim, memorySize, numTrees, numNeighbors, aggregatorPtr);
@@ -803,7 +803,7 @@ void Search::computeRootValues() {
       expectedScore = nnResultBuf.result->whiteScoreMean;
 //      const vector<uint8_t> &oneHotFeatureVector = board.toOneHotFeatureVector();
 //      const FeatureVector vector(oneHotFeatureVector.begin(), oneHotFeatureVector.end());
-//      double memoryValue = memoryPtr->Query(vector);
+//      double memoryValue = memoryPtr->query(vector);
     }
 
     recentScoreCenter = expectedScore * (1.0 - searchParams.dynamicScoreCenterZeroWeight);
@@ -1643,10 +1643,30 @@ void Search::runSinglePlayout(SearchThread& thread) {
   thread.history = rootHistory;
 }
 
-void Search::addLeafValue(SearchNode& node, double winValue, double noResultValue, double scoreMean, double scoreMeanSq, double lead, int32_t virtualLossesToSubtract) {
+void Search::addLeafValue(SearchNode& node, SearchThread& thread, double winValue, double noResultValue, double scoreMean, double scoreMeanSq, double lead, int32_t virtualLossesToSubtract) {
   double utility =
     getResultUtility(winValue, noResultValue)
     + getScoreUtility(scoreMean, scoreMeanSq, 1.0);
+
+  {
+    // MMCTS Related
+    Hash128 &hash = thread.board.pos_hash;
+    auto intFeatureVector = thread.board.toOneHotFeatureVector();
+    FeatureVector featureVector(intFeatureVector.begin(), intFeatureVector.end());
+    double origUtility = utility;
+
+    // Use memory query when memory's useful
+    if (memoryPtr->isFull()) {
+      std::cout << "Start Querying ..." << std::endl;
+      auto queryResult = memoryPtr->query(featureVector);
+      double memValue = queryResult.first;
+      utility = (1 - lambda) * utility + lambda * memValue;
+    }
+
+    // Add to memory if not exists
+    memoryPtr->update(hash, featureVector, origUtility, node.stats.visits);
+
+  }
 
   while(node.statsLock.test_and_set(std::memory_order_acquire));
   node.stats.visits += 1;
@@ -1748,7 +1768,7 @@ void Search::initNodeNNOutput(
   double scoreMeanSq = (double)node.nnOutput->whiteScoreMeanSq;
   double lead = (double)node.nnOutput->whiteLead;
 
-  addLeafValue(node,winProb,noResultProb,scoreMean,scoreMeanSq,lead,virtualLossesToSubtract);
+  addLeafValue(node, thread, winProb, noResultProb, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract);
 }
 
 void Search::playoutDescend(
@@ -1774,7 +1794,7 @@ void Search::playoutDescend(
       double scoreMean = 0.0;
       double scoreMeanSq = 0.0;
       double lead = 0.0;
-      addLeafValue(node, winValue, noResultValue, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract);
+	  addLeafValue(node, thread, winValue, noResultValue, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract);
       return;
     }
     else {
@@ -1783,7 +1803,7 @@ void Search::playoutDescend(
       double scoreMean = ScoreValue::whiteScoreDrawAdjust(thread.history.finalWhiteMinusBlackScore,searchParams.drawEquivalentWinsForWhite,thread.history);
       double scoreMeanSq = ScoreValue::whiteScoreMeanSqOfScoreGridded(thread.history.finalWhiteMinusBlackScore,searchParams.drawEquivalentWinsForWhite);
       double lead = scoreMean;
-      addLeafValue(node, winValue, noResultValue, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract);
+	  addLeafValue(node, thread, winValue, noResultValue, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract);
       return;
     }
   }

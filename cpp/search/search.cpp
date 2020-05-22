@@ -176,9 +176,9 @@ Search::Search(SearchParams params, NNEvaluator* nnEval, const string& rSeed)
   rootKoHashTable->recompute(rootHistory);
 
   const uint64_t featureDim = Board::MAX_ARR_SIZE * 4;
-  const uint64_t memorySize = 5000;
-  const uint64_t numTrees = 100;
-  const uint64_t numNeighbors = 10;
+  const uint64_t memorySize = 2000;
+  const uint64_t numTrees = 10;
+  const uint64_t numNeighbors = 5;
 
   std::unique_ptr<Aggregator> aggregatorPtr = std::make_unique<AverageAggregator>();
   memoryPtr = std::make_unique<Memory>(featureDim, memorySize, numTrees, numNeighbors, aggregatorPtr);
@@ -1657,15 +1657,17 @@ void Search::addLeafValue(SearchNode& node, SearchThread& thread, double winValu
 
     // Use memory query when memory's useful
     if (memoryPtr->isFull()) {
-      std::cout << "Start Querying ..." << std::endl;
+      thread.logger->write("Start querying ...");
       auto queryResult = memoryPtr->query(featureVector);
       double memValue = queryResult.first;
       utility = (1 - lambda) * utility + lambda * memValue;
     }
 
     // Add to memory if not exists
-    memoryPtr->update(hash, featureVector, origUtility, node.stats.visits);
-
+    if (!memoryPtr->hasHash(hash)) {
+      thread.logger->write("Adding to memory ...");
+      memoryPtr->update(hash, featureVector, origUtility, node.stats.visits);
+    }
   }
 
   while(node.statsLock.test_and_set(std::memory_order_acquire));

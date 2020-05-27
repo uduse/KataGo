@@ -1661,7 +1661,8 @@ void Search::addLeafValue(SearchNode& node, SearchThread& thread, double winValu
     double memValue = queryResult.first;
     double memVisits = queryResult.second;
     utility = (1 - lambda) * utility + lambda * memValue;
-    numVisits = (1 - lambda) * numVisits + lambda * memVisits;
+    numVisits = static_cast<int>((1 - lambda) * numVisits + lambda * memVisits);
+    thread.logger->write(std::to_string(numVisits));
   }
 
   // Add to memory if not exists

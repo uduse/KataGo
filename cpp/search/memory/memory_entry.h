@@ -1,19 +1,19 @@
 #pragma once
 
 #include "utils.h"
+#include "core/hash.h"
 
 class MemoryEntry {
 public:
   MemoryEntry(
-      const EntryID &id,
+      const Hash128 &hash,
       const uint64_t &touchStamp,
       FeatureVector featureVector,
       const double &value,
       const uint64_t &numVisits
   );
 
-  EntryID id;
-
+  Hash128 hash;
   uint64_t touchStamp;
 
   FeatureVector featureVector;

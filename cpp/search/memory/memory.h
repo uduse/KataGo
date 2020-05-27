@@ -13,6 +13,7 @@
 
 #include "utils.h"
 #include "core/hash.h"
+#include "core/logger.h"
 #include "memory_entry.h"
 #include "aggregator.h"
 
@@ -22,7 +23,7 @@ typedef multi_index_container<
     MemoryEntry,
     indexed_by<
         // index 0, unique by id, used to constant time lookup
-        hashed_unique<member<MemoryEntry, EntryID, &MemoryEntry::id>>,
+        hashed_unique<member<MemoryEntry, Hash128, &MemoryEntry::hash>>,
 
         // index 1, ordered by touch stamp, used to kick outdated entries
         ordered_non_unique<member<MemoryEntry, uint64_t, &MemoryEntry::touchStamp>, std::less<>>
@@ -32,20 +33,18 @@ typedef multi_index_container<
 class Memory {
 public:
   Memory(
-    const uint64_t &feature_dim,
-    const uint64_t &memory_size,
-    const uint64_t &num_trees,
-    const uint64_t &num_neighbors,
-    std::unique_ptr<Aggregator> &aggregator_ptr
+      const uint64_t &feature_dim,
+      const uint64_t &memory_size,
+      const uint64_t &num_neighbors,
+      std::unique_ptr<Aggregator> &aggregator_ptr,
+      Logger &logger
   );
 
   void update(const Hash128 &hash, const FeatureVector &featureVector, const double &value, const uint64_t &numVisits);
-  std::pair<double, int> query(const FeatureVector &target);
-  void build();
+  std::pair<double, int> query(const FeatureVector &featureVector);
 
   bool isFull() const;
   bool hasHash(const Hash128 &hash);
-  EntryID getID(const Hash128 &hash);
 
   [[nodiscard]] size_t size() const;
   [[nodiscard]] std::string toString() const;
@@ -53,19 +52,14 @@ public:
 private:
   const uint64_t featureDim;
   const uint64_t memorySize;
-  const uint64_t numTrees;
   const uint64_t numNeighbors;
-
-  // Internal helper methods
-  void touchEntriesByIDs(const vector<EntryID> &nn_ids);
-  [[nodiscard]] std::vector<std::shared_ptr<MemoryEntry>> GetEntriesByIDs(const std::vector<EntryID> &ids) const;
-
-  std::unordered_map<uint64_t, EntryID> idMap;
-  EntryContainer entries;
   std::unique_ptr<Aggregator> aggregatorPtr;
+  Logger &logger;
+
+  EntryContainer entries;
   uint64_t touchCounter;
-  AnnoyPtr annoyPtr;
-  bool annoyOutDated;
+
+  void touchEntriesByHashes(const std::vector<Hash128> &NNHashes);
 };
 
 

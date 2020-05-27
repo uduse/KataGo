@@ -3,24 +3,24 @@
 //
 
 #include <boost/algorithm/string/join.hpp>
+#include <queue>
+
 #include "memory.h"
 
 Memory::Memory(
-	const uint64_t &feature_dim,
-	const uint64_t &memory_size,
-	const uint64_t &num_trees,
-	const uint64_t &num_neighbors,
-	std::unique_ptr<Aggregator> &aggregator_ptr
+    const uint64_t &featureDim,
+    const uint64_t &memorySize,
+    const uint64_t &numNeighbors,
+    std::unique_ptr<Aggregator> &aggregatorPtr,
+    Logger &logger
 )
-	: featureDim{feature_dim},
-	  memorySize{memory_size},
-	  numTrees{num_trees},
-	  numNeighbors(num_neighbors),
-	  annoyPtr{nullptr},
-	  annoyOutDated(true),
-	  entries{},
-	  touchCounter{0},
-	  aggregatorPtr{std::move(aggregator_ptr)} {}
+    : featureDim{featureDim},
+      memorySize{memorySize},
+      numNeighbors(numNeighbors),
+      entries{},
+      touchCounter{0},
+      aggregatorPtr{std::move(aggregatorPtr)},
+      logger{logger} {}
 
 void Memory::update(
     const Hash128 &hash,
@@ -28,87 +28,80 @@ void Memory::update(
     const double &value,
     const uint64_t &numVisits
 ) {
-  assert(featureVector.size()==featureDim);
+  assert(featureVector.size() == featureDim);
 
-  EntryID id = getID(hash);
   MemoryEntry entry(
-      id,
+      hash,
       touchCounter++,
       featureVector,
       value,
       numVisits
   );
 
-  auto &index_by_id = entries.get<0>();
-  auto found = index_by_id.find(id);
-  if (found != index_by_id.end()) {
-	index_by_id.replace(found, entry);
+  auto &indexByHash = entries.get<0>();
+  auto found = indexByHash.find(hash);
+  if (found != indexByHash.end()) {
+    indexByHash.replace(found, entry);
   } else {
-	index_by_id.insert(entry);
-	if (entries.size() > memorySize) {
-	  auto &index_by_touch_stamp = entries.get<1>();
-	  auto target = index_by_touch_stamp.begin();
-	  index_by_touch_stamp.erase(target);
-	}
-	annoyOutDated = true;
+    indexByHash.insert(entry);
+    if (entries.size() > memorySize) {
+      auto &indexByTouchStamp = entries.get<1>();
+      indexByTouchStamp.erase(indexByTouchStamp.begin());
+    }
   }
 }
 
-std::pair<double, int> Memory::query(const FeatureVector &target) {
-  if (annoyOutDated) {
-	build();
-	annoyOutDated = false;
+std::pair<double, int> Memory::query(const FeatureVector &featureVector) {
+
+  auto &indexByHash = entries.get<0>();
+
+  std::priority_queue<std::pair<double, Hash128>> priorityQueue;
+  for (const auto &entry : indexByHash) {
+    double similarity = utils::cosineSimilarity(featureVector, entry.featureVector);
+    priorityQueue.push(std::make_pair(-similarity, entry.hash));
+    if (priorityQueue.size() > numNeighbors) {
+      priorityQueue.pop();
+    }
   }
 
-  std::vector<EntryID> nnIDs;
+  std::vector<Hash128> topNeighbors;
   std::vector<double> distances;
+  while (!priorityQueue.empty()) {
+    auto topItem = priorityQueue.top();
+    topNeighbors.push_back(topItem.second);
+    distances.push_back(topItem.first + 1);
+    priorityQueue.pop();
+  }
 
-  annoyPtr->get_nns_by_vector(target.data(), numNeighbors, -1, &nnIDs, &distances);
-  const std::vector<std::shared_ptr<MemoryEntry>> &entryPtrs = GetEntriesByIDs(nnIDs);
+  std::vector<std::shared_ptr<MemoryEntry>> entryPtrs;
+  for (const auto &hash : topNeighbors) {
+    std::make_shared<MemoryEntry>(*indexByHash.find(hash));
+  }
+
+  touchEntriesByHashes(topNeighbors);
+
   auto result = aggregatorPtr->Aggregate(entryPtrs, distances);
   return result;
 }
 
-void Memory::touchEntriesByIDs(const vector<EntryID> &nn_ids) {
-  auto &index_by_id = this->entries.get<0>();
-  for (auto &id : nn_ids) {
-    auto found = index_by_id.find(id);
-    auto touch_counter = this->touchCounter++;
-    index_by_id.modify(
+void Memory::touchEntriesByHashes(const std::vector<Hash128> &NNHashes) {
+  auto &indexByHash = entries.get<0>();
+  for (auto &hash : NNHashes) {
+    auto found = indexByHash.find(hash);
+    auto currTouchCounter = touchCounter++;
+    indexByHash.modify(
         found,
-        [&touch_counter](auto &entry) {
-          entry.touchStamp = touch_counter;
+        [&currTouchCounter](auto &entry) {
+          entry.touchStamp = currTouchCounter;
         }
     );
   }
 }
 
-void Memory::build() {
-  assert(!entries.empty());
-  annoyPtr = std::move(std::make_unique<IndexType>(featureDim));
-  auto &index_by_id = entries.get<0>();
-  for (auto &entry : index_by_id) {
-	annoyPtr->add_item(entry.id, entry.featureVector.data());
-  }
-  annoyPtr->build(numTrees);
-}
-
-std::vector<std::shared_ptr<MemoryEntry>>
-Memory::GetEntriesByIDs(const std::vector<EntryID> &ids) const {
-  std::vector<std::shared_ptr<MemoryEntry>> results;
-
-  auto &index_by_id = entries.get<0>();
-  for (auto &id : ids) {
-	auto candidate = index_by_id.find(id);
-	results.push_back(std::make_shared<MemoryEntry>(*candidate));
-  }
-  return results;
-}
-
 std::string Memory::toString() const {
   std::vector<std::string> strings;
-  auto &index_by_id = entries.get<0>();
-  for (const auto &entry : index_by_id) {
+  auto &indexByHash = entries.get<0>();
+  for (const auto &entry : indexByHash) {
     strings.push_back(entry.toString());
   }
   return boost::algorithm::join(strings, "\n");
@@ -119,24 +112,12 @@ bool Memory::isFull() const {
 }
 
 bool Memory::hasHash(const Hash128 &hash) {
-  auto id = getID(hash);
-  auto &index_by_id = entries.get<0>();
-  auto found = index_by_id.find(id);
-  return found != index_by_id.end();
+  auto &indexByHash = entries.get<0>();
+  auto found = indexByHash.find(hash);
+  return found != indexByHash.end();
 }
 
 size_t Memory::size() const {
   return entries.size();
 }
 
-EntryID Memory::getID(const Hash128 &hash) {
-  auto xorHash = hash.hash0 ^hash.hash1;
-  auto found = idMap.find(xorHash);
-  if (found != idMap.end()) {
-    return found->second;
-  } else {
-    EntryID id = static_cast<EntryID>(idMap.size());
-    idMap.emplace(std::make_pair(xorHash, id));
-    return id;
-  }
-}

@@ -18,6 +18,7 @@ std::pair<double, int> AverageAggregator::Aggregate(
   const std::vector<std::shared_ptr<MemoryEntry>> &entries,
   const std::vector<double> &distances
 ) const {
+  assert(entries.size() == distances.size());
   double valueSum = 0;
   int numVisitsSum = 0;
   for (const auto &entry : entries) {
@@ -31,6 +32,7 @@ std::pair<double, int> WeightedAverageAggregator::Aggregate(
   const std::vector<std::shared_ptr<MemoryEntry>> &entries,
   const std::vector<double> &distances
 ) const {
+  assert(entries.size() == distances.size());
   double distSum = 0;
   for (const auto &dist : distances) {
     distSum += dist;
@@ -50,6 +52,7 @@ std::pair<double, int> WeightedSoftmaxAggregator::Aggregate(
   const std::vector<std::shared_ptr<MemoryEntry>> &entries,
   const std::vector<double> &distances
 ) const {
+  assert(entries.size() == distances.size());
   auto weights = utils::softmax(distances);
   assert(entries.size() == weights.size());
   double value = 0;

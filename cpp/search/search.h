@@ -1,8 +1,6 @@
 #ifndef SEARCH_SEARCH_H_
 #define SEARCH_SEARCH_H_
 
-#include <memory>
-
 #include "../core/global.h"
 #include "../core/hash.h"
 #include "../core/logger.h"

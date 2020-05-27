@@ -123,5 +123,8 @@ inline Hash128& Hash128::operator&=(const Hash128 other) {
   return *this;
 }
 
+inline std::size_t hash_value(const Hash128 &hash) {
+  return hash.hash0 ^ hash.hash1;
+}
 
 #endif  // CORE_HASH_H_

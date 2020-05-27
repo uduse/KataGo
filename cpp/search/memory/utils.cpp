@@ -26,18 +26,6 @@ std::string utils::toString(const FeatureVector &vector) {
   return "[" + boost::algorithm::join(strings, ", ") + "]";
 }
 
-std::string utils::ToString(const std::vector<uint64_t> &vector) {
-  std::vector<std::string> strings;
-  std::transform(
-      vector.begin(),
-      vector.end(),
-      std::back_inserter(strings),
-      [](const uint64_t &val) {
-        return std::to_string(val);
-      });
-  return "<" + boost::algorithm::join(strings, ", ") + ">";
-}
-
 std::vector<double> utils::softmax(const std::vector<double> &vector) {
   std::vector<double> exps;
   std::transform(
@@ -56,11 +44,24 @@ std::vector<double> utils::softmax(const std::vector<double> &vector) {
   return result;
 }
 
-std::function<double()> utils::GetRandomDoubleFactory() {
+std::function<double()> utils::getRandomDoubleFactory() {
   static std::random_device random_device;
   static std::mt19937 engine{random_device()};
   static std::normal_distribution<double> distribution{0.0, 1.0};
   return []() { return distribution(engine); };
+}
+
+double utils::cosineSimilarity(std::vector<double> lhs, std::vector<double> rhs) {
+  assert(lhs.size() == rhs.size());
+  double numerator = 0;
+  double lhs_denom = 0;
+  double rhs_denom = 0;
+  for (int i = 0; i < lhs.size(); i++) {
+    numerator += lhs[i] * rhs[i];
+    lhs_denom += lhs[i] * lhs[i];
+    rhs_denom += rhs[i] * rhs[i];
+  }
+  return numerator / (lhs_denom * rhs_denom);
 }
 
 

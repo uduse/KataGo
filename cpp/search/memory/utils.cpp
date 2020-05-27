@@ -5,6 +5,7 @@
 #include "utils.h"
 
 #include <boost/algorithm/string/join.hpp>
+#include <chrono>
 
 void utils::timeIt(const std::function<void()> &func, const std::string &desc) {
   std::chrono::high_resolution_clock::time_point t_start, t_end;

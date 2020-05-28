@@ -11,6 +11,7 @@ std::pair<double, int> Aggregator::Aggregate(
   const std::vector<std::shared_ptr<MemoryEntry>> &entries,
   const std::vector<double> &distances
 ) const {
+  assert(entries.size() == distances.size());
   return std::make_pair(0.0, 0);
 }
 

@@ -13,6 +13,7 @@ void utils::timeIt(const std::function<void()> &func, const std::string &desc) {
   func();
   t_end = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+  std::cout << desc << std::to_string(duration) << std::endl;
 }
 
 std::string utils::toString(const FeatureVector &vector) {

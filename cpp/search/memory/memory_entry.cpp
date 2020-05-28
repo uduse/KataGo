@@ -12,13 +12,17 @@ MemoryEntry::MemoryEntry(
     const uint64_t &numVisits
 )
     : hash{hash},
-      featureVector{std::move(featureVector)},
       touchStamp{touchStamp},
+      featureVector{std::move(featureVector)},
       value{value},
       numVisits{numVisits} {}
 
 std::string MemoryEntry::toString() const {
-  return "Entry #" + std::to_string(hash.hash0) + " (" + std::to_string(touchStamp)
-      + "): " + utils::toString(featureVector);
+//  return "Entry #" + std::to_string(hash.hash0) + " (" + std::to_string(touchStamp)
+//      + "): " + utils::toString(featureVector);
+  return "Entry #" + std::to_string(hash.hash0)
+      + " touch: " + std::to_string(touchStamp)
+      + " value: " + std::to_string(value)
+      + " numVisits: " + std::to_string(numVisits);
 }
 

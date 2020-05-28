@@ -310,6 +310,26 @@ vector<SearchParams> Setup::loadParams(
     if(cfg.contains("maxTime"+idxStr)) params.maxTime = cfg.getDouble("maxTime"+idxStr, 0.0, 1.0e20);
     else if(cfg.contains("maxTime"))   params.maxTime = cfg.getDouble("maxTime",        0.0, 1.0e20);
 
+    if(cfg.contains("memorySize"))
+    {
+      params.memorySize = cfg.getInt64("memorySize", (int64_t) 100, (int64_t) 65535);
+    } else {
+      params.memorySize = (int64_t) 2000;
+    }
+
+    if (cfg.contains("memoryLambda")) {
+      params.memoryLambda = cfg.getDouble("memoryLambda", (double) 0.001, (double) 1);
+    } else {
+      params.memoryLambda = (double) 0.05;
+    }
+
+    if (cfg.contains("memoryNumNeighbors")) {
+      params.memoryNumNeighbors = cfg.getUInt64(
+          "memoryNumNeighbors", (uint64_t) 2, (uint64_t) 128);
+    } else {
+      params.memoryNumNeighbors = (uint64_t) 8;
+    }
+
     if(cfg.contains("maxPlayoutsPondering"+idxStr)) params.maxPlayoutsPondering = cfg.getInt64("maxPlayoutsPondering"+idxStr, (int64_t)1, (int64_t)1 << 50);
     else if(cfg.contains("maxPlayoutsPondering"))   params.maxPlayoutsPondering = cfg.getInt64("maxPlayoutsPondering",        (int64_t)1, (int64_t)1 << 50);
     else                                            params.maxPlayoutsPondering = (int64_t)1 << 50;

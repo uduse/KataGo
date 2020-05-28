@@ -174,6 +174,23 @@ Search::Search(SearchParams params, NNEvaluator* nnEval, const string& rSeed)
 
   rootHistory.clear(rootBoard,rootPla,Rules(),0);
   rootKoHashTable->recompute(rootHistory);
+
+  // MMCTS config initialization
+  memorySize = params.memorySize;
+  memoryNumNeighbors = params.memoryNumNeighbors;
+  memoryLambda = params.memoryLambda;
+
+  std::cout << "memorySize: " << memorySize << " memoryNumNeighbors: " << memoryNumNeighbors
+            << " memoryLambda: " << memoryLambda << std::endl;
+  const uint64_t featureDim = Board::MAX_ARR_SIZE * 4;
+
+  std::unique_ptr<Aggregator> aggregatorPtr = std::make_unique<AverageAggregator>();
+  memoryPtr = std::make_unique<Memory>(
+      featureDim,
+      memorySize,
+      memoryNumNeighbors,
+      aggregatorPtr
+  );
 }
 
 Search::~Search() {
@@ -476,14 +493,6 @@ void Search::runWholeSearch(
   const TimeControls& tc,
   double searchFactor
 ) {
-  const uint64_t featureDim = Board::MAX_ARR_SIZE * 4;
-  const uint64_t memorySize = 2000;
-  const uint64_t numNeighbors = 5;
-
-  std::unique_ptr<Aggregator> aggregatorPtr = std::make_unique<AverageAggregator>();
-  memoryPtr = std::make_unique<Memory>(
-      featureDim, memorySize, numNeighbors, aggregatorPtr, logger
-  );
 
   ClockTimer timer;
   atomic<int64_t> numPlayoutsShared(0);
@@ -801,9 +810,6 @@ void Search::computeRootValues() {
         nnResultBuf, skipCache, includeOwnerMap
       );
       expectedScore = nnResultBuf.result->whiteScoreMean;
-//      const vector<uint8_t> &oneHotFeatureVector = board.toOneHotFeatureVector();
-//      const FeatureVector vector(oneHotFeatureVector.begin(), oneHotFeatureVector.end());
-//      double memoryValue = memoryPtr->query(vector);
     }
 
     recentScoreCenter = expectedScore * (1.0 - searchParams.dynamicScoreCenterZeroWeight);
@@ -1612,7 +1618,13 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
     utilitySqSum += utility * utility * desiredWeight;
     weightSum += desiredWeight;
     weightSqSum += desiredWeight * desiredWeight;
+
+    const Hash128 &hash = thread.board.pos_hash;
+    auto intFeatureVector = thread.board.toOneHotFeatureVector();
+    std::vector<double> featureVector(intFeatureVector.begin(), intFeatureVector.end());
+    memoryPtr->update(hash, featureVector, utility, node.stats.visits + numVisitsToAdd, thread.logger);
   }
+
 
   while(node.statsLock.test_and_set(std::memory_order_acquire));
   node.stats.visits += numVisitsToAdd;
@@ -1657,19 +1669,17 @@ void Search::addLeafValue(SearchNode& node, SearchThread& thread, double winValu
 
   // Use memory query when memory's useful
   if (memoryPtr->isFull()) {
-    auto queryResult = memoryPtr->query(featureVector);
+    auto queryResult = memoryPtr->query(featureVector, thread.logger);
     double memValue = queryResult.first;
     double memVisits = queryResult.second;
-    utility = (1 - lambda) * utility + lambda * memValue;
-    numVisits = static_cast<int>((1 - lambda) * numVisits + lambda * memVisits);
-    thread.logger->write(std::to_string(numVisits));
+    utility = (1 - memoryLambda) * utility + memoryLambda * memValue;
+    numVisits = (1 - memoryLambda) * numVisits + memoryLambda * memVisits;
   }
 
-  // Add to memory if not exists
+  // Add to memory
   if (!memoryPtr->hasHash(hash)) {
-    memoryPtr->update(hash, featureVector, origUtility, node.stats.visits);
+    memoryPtr->update(hash, featureVector, origUtility, node.stats.visits + 1, thread.logger);
   }
-
 
   while(node.statsLock.test_and_set(std::memory_order_acquire));
   node.stats.visits += numVisits;

@@ -36,12 +36,12 @@ public:
       const uint64_t &feature_dim,
       const uint64_t &memory_size,
       const uint64_t &num_neighbors,
-      std::unique_ptr<Aggregator> &aggregator_ptr,
-      Logger &logger
+      std::unique_ptr<Aggregator> &aggregator_ptr
   );
 
-  void update(const Hash128 &hash, const FeatureVector &featureVector, const double &value, const uint64_t &numVisits);
-  std::pair<double, int> query(const FeatureVector &featureVector);
+  void update(const Hash128 &hash, const FeatureVector &featureVector, const double &value,
+              const uint64_t &numVisits, Logger *logger = nullptr);
+  std::pair<double, int> query(const FeatureVector &featureVector, Logger *logger = nullptr);
 
   bool isFull() const;
   bool hasHash(const Hash128 &hash);
@@ -54,7 +54,6 @@ private:
   const uint64_t memorySize;
   const uint64_t numNeighbors;
   std::unique_ptr<Aggregator> aggregatorPtr;
-  Logger &logger;
 
   EntryContainer entries;
   uint64_t touchCounter;

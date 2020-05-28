@@ -178,7 +178,9 @@ struct Search {
 
   // MMCTS Related
   std::unique_ptr<Memory> memoryPtr;
-  double lambda = 0.05;
+  uint64_t memorySize;
+  double memoryLambda;
+  uint64_t memoryNumNeighbors;
 
   //Note - randSeed controls a few things in the search, but a lot of the randomness actually comes from
   //random symmetries of the neural net evaluations, see nneval.h

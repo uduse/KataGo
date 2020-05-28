@@ -11,24 +11,27 @@ Memory::Memory(
     const uint64_t &featureDim,
     const uint64_t &memorySize,
     const uint64_t &numNeighbors,
-    std::unique_ptr<Aggregator> &aggregatorPtr,
-    Logger &logger
+    std::unique_ptr<Aggregator> &aggregatorPtr
 )
     : featureDim{featureDim},
       memorySize{memorySize},
       numNeighbors(numNeighbors),
       entries{},
       touchCounter{0},
-      aggregatorPtr{std::move(aggregatorPtr)},
-      logger{logger} {}
+      aggregatorPtr{std::move(aggregatorPtr)} {}
 
 void Memory::update(
     const Hash128 &hash,
     const FeatureVector &featureVector,
     const double &value,
-    const uint64_t &numVisits
+    const uint64_t &numVisits,
+    Logger *logger
 ) {
   assert(featureVector.size() == featureDim);
+
+  if (touchCounter % 1000 == 0) {
+    logger->write(toString());
+  }
 
   MemoryEntry entry(
       hash,
@@ -49,9 +52,12 @@ void Memory::update(
       indexByTouchStamp.erase(indexByTouchStamp.begin());
     }
   }
+  if (logger) {
+    logger->write("Update - Size: " + std::to_string(entries.size()));
+  }
 }
 
-std::pair<double, int> Memory::query(const FeatureVector &featureVector) {
+std::pair<double, int> Memory::query(const FeatureVector &featureVector, Logger *logger) {
 
   auto &indexByHash = entries.get<0>();
 
@@ -69,24 +75,35 @@ std::pair<double, int> Memory::query(const FeatureVector &featureVector) {
   while (!priorityQueue.empty()) {
     auto topItem = priorityQueue.top();
     topNeighbors.push_back(topItem.second);
+    // normalize to [0, 1] range
     distances.push_back(topItem.first + 1);
     priorityQueue.pop();
   }
 
   std::vector<std::shared_ptr<MemoryEntry>> entryPtrs;
+  entryPtrs.reserve(topNeighbors.size());
   for (const auto &hash : topNeighbors) {
-    std::make_shared<MemoryEntry>(*indexByHash.find(hash));
+    entryPtrs.push_back(std::make_shared<MemoryEntry>(*indexByHash.find(hash)));
   }
 
   touchEntriesByHashes(topNeighbors);
 
+//  for (const auto &entryPtr : entryPtrs) {
+//    logger->write("entryPtr->value" + std::to_string(entryPtr->value));
+//  }
+
   auto result = aggregatorPtr->Aggregate(entryPtrs, distances);
+
+  if (logger) {
+    logger->write("Query - ");
+  }
+
   return result;
 }
 
 void Memory::touchEntriesByHashes(const std::vector<Hash128> &NNHashes) {
   auto &indexByHash = entries.get<0>();
-  for (auto &hash : NNHashes) {
+  for (const auto &hash : NNHashes) {
     auto found = indexByHash.find(hash);
     auto currTouchCounter = touchCounter++;
     indexByHash.modify(

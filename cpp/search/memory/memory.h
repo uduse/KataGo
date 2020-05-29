@@ -49,6 +49,8 @@ public:
   [[nodiscard]] size_t size() const;
   [[nodiscard]] std::string toString() const;
 
+  const uint64_t getFeatureDim() const;
+
 private:
   const uint64_t featureDim;
   const uint64_t memorySize;

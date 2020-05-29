@@ -49,6 +49,9 @@ struct NodeStats {
   double weightSum;
   double weightSqSum;
 
+  double memUtility;
+  double memVisits;
+
   NodeStats();
   ~NodeStats();
 
@@ -181,6 +184,7 @@ struct Search {
   uint64_t memorySize;
   double memoryLambda;
   uint64_t memoryNumNeighbors;
+  uint64_t memoryUpdateSchema;
 
   //Note - randSeed controls a few things in the search, but a lot of the randomness actually comes from
   //random symmetries of the neural net evaluations, see nneval.h

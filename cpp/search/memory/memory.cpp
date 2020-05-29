@@ -29,7 +29,7 @@ void Memory::update(
 ) {
   assert(featureVector.size() == featureDim);
 
-  if (touchCounter % 1000 == 0) {
+  if (logger && touchCounter % 1000 == 0) {
     logger->write(toString());
   }
 
@@ -136,5 +136,8 @@ bool Memory::hasHash(const Hash128 &hash) {
 
 size_t Memory::size() const {
   return entries.size();
+}
+const uint64_t Memory::getFeatureDim() const {
+  return featureDim;
 }
 

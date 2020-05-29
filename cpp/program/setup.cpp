@@ -330,6 +330,13 @@ vector<SearchParams> Setup::loadParams(
       params.memoryNumNeighbors = (uint64_t) 8;
     }
 
+    if (cfg.contains("memoryUpdateSchema")) {
+      params.memoryUpdateSchema = cfg.getUInt64(
+          "memoryUpdateSchema", (uint64_t) 0, (uint64_t) 2);
+    } else {
+      params.memoryUpdateSchema = (uint64_t) 0;
+    }
+
     if(cfg.contains("maxPlayoutsPondering"+idxStr)) params.maxPlayoutsPondering = cfg.getInt64("maxPlayoutsPondering"+idxStr, (int64_t)1, (int64_t)1 << 50);
     else if(cfg.contains("maxPlayoutsPondering"))   params.maxPlayoutsPondering = cfg.getInt64("maxPlayoutsPondering",        (int64_t)1, (int64_t)1 << 50);
     else                                            params.maxPlayoutsPondering = (int64_t)1 << 50;

@@ -87,6 +87,7 @@ struct SearchParams {
   int64_t memorySize;
   int64_t memoryNumNeighbors;
   double memoryLambda;
+  uint64_t memoryUpdateSchema;
 
   SearchParams();
   ~SearchParams();

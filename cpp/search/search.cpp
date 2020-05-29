@@ -19,7 +19,8 @@ ReportedSearchValues::~ReportedSearchValues()
 {}
 
 NodeStats::NodeStats()
-  :visits(0),winValueSum(0.0),noResultValueSum(0.0),scoreMeanSum(0.0),scoreMeanSqSum(0.0),leadSum(0.0),utilitySum(0.0),utilitySqSum(0.0),weightSum(0.0),weightSqSum(0.0)
+  :visits(0),winValueSum(0.0),noResultValueSum(0.0),scoreMeanSum(0.0),scoreMeanSqSum(0.0),leadSum(0.0),utilitySum(0.0),utilitySqSum(0.0),weightSum(0.0),weightSqSum(0.0),
+  memUtility(0), memVisits(0)
 {}
 NodeStats::~NodeStats()
 {}
@@ -179,6 +180,7 @@ Search::Search(SearchParams params, NNEvaluator* nnEval, const string& rSeed)
   memorySize = params.memorySize;
   memoryNumNeighbors = params.memoryNumNeighbors;
   memoryLambda = params.memoryLambda;
+  memoryUpdateSchema = params.memoryUpdateSchema;
 
   std::cout << "memorySize: " << memorySize << " memoryNumNeighbors: " << memoryNumNeighbors
             << " memoryLambda: " << memoryLambda << std::endl;
@@ -1500,6 +1502,10 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
 
   int numChildren = node.numChildren;
   int numGoodChildren = 0;
+
+  std::vector<double> childrenMemoryUtilities(numChildren);
+  std::vector<double> childrenMemoryVisits(numChildren);
+
   for(int i = 0; i<numChildren; i++) {
     const SearchNode* child = node.children[i];
 
@@ -1514,6 +1520,8 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
     double weightSqSum = child->stats.weightSqSum;
     double utilitySum = child->stats.utilitySum;
     double utilitySqSum = child->stats.utilitySqSum;
+    double memoryUtility = child->stats.memUtility;
+    double memoryVisits = child->stats.memVisits;
     child->statsLock.clear(std::memory_order_release);
 
     if(childVisits <= 0)
@@ -1533,6 +1541,9 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
     weightSums[numGoodChildren] = weightSum;
     weightSqSums[numGoodChildren] = weightSqSum;
     visits[numGoodChildren] = childVisits;
+    childrenMemoryUtilities[numGoodChildren] = memoryUtility;
+    childrenMemoryVisits[numGoodChildren] = memoryVisits;
+
     totalChildVisits += childVisits;
 
     if(childVisits > maxChildVisits)
@@ -1568,6 +1579,10 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
   double utilitySqSum = 0.0;
   double weightSum = 0.0;
   double weightSqSum = 0.0;
+
+  double nodeNetMemUtility = 0.0;
+  double nodeNetMemVisits = 0.0;
+
   for(int i = 0; i<numGoodChildren; i++) {
     if(visits[i] < amountToPrune)
       continue;
@@ -1589,7 +1604,12 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
     utilitySqSum += weightScaling * utilitySqSums[i];
     weightSum += desiredWeight;
     weightSqSum += weightScaling * weightScaling * weightSqSums[i];
+
+    nodeNetMemUtility += childrenMemoryVisits[i] * childrenMemoryUtilities[i];
+    nodeNetMemVisits += childrenMemoryVisits[i];
   }
+
+  nodeNetMemUtility /= nodeNetMemVisits;
 
   //Also add in the direct evaluation of this node.
   {
@@ -1620,9 +1640,26 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
     weightSqSum += desiredWeight * desiredWeight;
 
     const Hash128 &hash = thread.board.pos_hash;
-    auto intFeatureVector = thread.board.toOneHotFeatureVector();
-    std::vector<double> featureVector(intFeatureVector.begin(), intFeatureVector.end());
-    memoryPtr->update(hash, featureVector, utility, node.stats.visits + numVisitsToAdd, thread.logger);
+    FeatureVector featureVector(memoryPtr->getFeatureDim());
+    for (int i = 0; i < memoryPtr->getFeatureDim(); i++) {
+      featureVector[i] = node.nnOutput->whiteOwnerMap[i];
+    }
+
+    if (memoryUpdateSchema == 0) {
+      memoryPtr->update(hash, featureVector, utility, numVisitsToAdd, thread.logger);
+    } else if (memoryUpdateSchema == 1) {
+      memoryPtr->update(hash, featureVector, utilitySum / (node.stats.visits + numVisitsToAdd),
+          node.stats.visits + numVisitsToAdd, thread.logger);
+      if (memoryPtr->isFull()) {
+        utilitySum = ((1 - memoryLambda) * utilitySum) + (memoryLambda * nodeNetMemUtility * (node.stats.visits + numVisitsToAdd));
+      }
+    } else if (memoryUpdateSchema == 2) {
+      auto queryResult = memoryPtr->query(featureVector, thread.logger);
+      memoryPtr->update(hash, featureVector, utilitySum / node.stats.visits + numVisitsToAdd,
+          node.stats.visits + numVisitsToAdd, thread.logger);
+      double queriedUtility = queryResult.first;
+      utilitySum = ((1 - memoryLambda) * utilitySum) + (memoryLambda * queriedUtility * node.stats.visits);
+    }
   }
 
 
@@ -1642,6 +1679,8 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
   node.stats.weightSum = weightSum;
   node.stats.weightSqSum = weightSqSum;
   node.virtualLosses -= virtualLossesToSubtract;
+  node.stats.memVisits = nodeNetMemVisits;
+  node.stats.memUtility = nodeNetMemUtility;
   node.statsLock.clear(std::memory_order_release);
 }
 
@@ -1660,25 +1699,39 @@ void Search::addLeafValue(SearchNode& node, SearchThread& thread, double winValu
     getResultUtility(winValue, noResultValue)
     + getScoreUtility(scoreMean, scoreMeanSq, 1.0);
   int numVisits = 1;
+  double utilitySum = node.stats.utilitySum;
+  double memUtility = 0;
+  double memVisits = 0;
 
   // MMCTS Related
-  Hash128 &hash = thread.board.pos_hash;
-  auto intFeatureVector = thread.board.toOneHotFeatureVector();
-  FeatureVector featureVector(intFeatureVector.begin(), intFeatureVector.end());
-  double origUtility = utility;
+  if (node.nnOutput) {
+    Hash128 &hash = thread.board.pos_hash;
 
-  // Use memory query when memory's useful
-  if (memoryPtr->isFull()) {
-    auto queryResult = memoryPtr->query(featureVector, thread.logger);
-    double memValue = queryResult.first;
-    double memVisits = queryResult.second;
-    utility = (1 - memoryLambda) * utility + memoryLambda * memValue;
-    numVisits = (1 - memoryLambda) * numVisits + memoryLambda * memVisits;
-  }
+    FeatureVector featureVector(memoryPtr->getFeatureDim());
+    for (int i = 0; i < memoryPtr->getFeatureDim(); i++) {
+      featureVector[i] = node.nnOutput->whiteOwnerMap[i];
+    }
 
-  // Add to memory
-  if (!memoryPtr->hasHash(hash)) {
-    memoryPtr->update(hash, featureVector, origUtility, node.stats.visits + 1, thread.logger);
+    double origUtility = utility;
+
+    // Use memory query when memory's useful
+    if (memoryUpdateSchema == 0) {
+      if (memoryPtr->isFull()) {
+        auto queryResult = memoryPtr->query(featureVector, thread.logger);
+        memUtility = queryResult.first;
+        memVisits = queryResult.second;
+        utility = (1 - memoryLambda) * utility + memoryLambda * memUtility;
+        numVisits = (1 - memoryLambda) * numVisits + memoryLambda * memVisits;
+        utilitySum += utility;
+      }
+      memoryPtr->update(hash, featureVector, origUtility, node.stats.visits + 1, thread.logger);
+    } else if (memoryUpdateSchema == 1 || memoryUpdateSchema == 2) {
+      auto queryResult = memoryPtr->query(featureVector, thread.logger);
+      memUtility = queryResult.first;
+      memVisits = queryResult.second;
+      utilitySum = ((1 - memoryLambda) * utilitySum) + (memoryLambda * memUtility * node.stats.visits);
+      memoryPtr->update(hash, featureVector, utilitySum / node.stats.visits + 1, node.stats.visits + 1, thread.logger);
+    }
   }
 
   while(node.statsLock.test_and_set(std::memory_order_acquire));
@@ -1688,12 +1741,13 @@ void Search::addLeafValue(SearchNode& node, SearchThread& thread, double winValu
   node.stats.scoreMeanSum += scoreMean;
   node.stats.scoreMeanSqSum += scoreMeanSq;
   node.stats.leadSum += lead;
-  node.stats.utilitySum += utility;
-  node.stats.utilitySqSum += utility * utility;
+  node.stats.utilitySum = utilitySum;
+  node.stats.utilitySqSum = utility * utility;
   node.stats.weightSum += 1.0;
   node.stats.weightSqSum += 1.0;
   node.virtualLosses -= virtualLossesToSubtract;
-//  node.stats
+  node.stats.memUtility = memUtility;
+  node.stats.memVisits = memVisits;
   node.statsLock.clear(std::memory_order_release);
 }
 

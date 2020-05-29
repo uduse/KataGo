@@ -60,7 +60,8 @@ SearchParams::SearchParams()
    searchFactorAfterTwoPass(1.0),
    memorySize(256),
    memoryLambda(0.05),
-   memoryNumNeighbors(4)
+   memoryNumNeighbors(4),
+   memoryUpdateSchema(0)
 {}
 
 SearchParams::~SearchParams()

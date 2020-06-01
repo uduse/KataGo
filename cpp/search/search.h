@@ -16,6 +16,7 @@
 #include "../search/searchparams.h"
 #include "../search/searchprint.h"
 #include "../search/timecontrols.h"
+#include "../search/memory/memory.h"
 
 struct SearchNode;
 struct SearchThread;
@@ -176,6 +177,13 @@ struct Search {
   int nnYLen;
   int policySize;
   Rand nonSearchRand; //only for use not in search, since rand isn't threadsafe
+
+  // MMCTS Related
+  std::unique_ptr<Memory> memoryPtr;
+  uint64_t memorySize;
+  double memoryLambda;
+  uint64_t memoryNumNeighbors;
+  uint64_t memoryUpdateSchema;
 
   //Note - randSeed controls a few things in the search, but a lot of the randomness actually comes from
   //random symmetries of the neural net evaluations, see nneval.h

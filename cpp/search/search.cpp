@@ -1639,27 +1639,28 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
     weightSum += desiredWeight;
     weightSqSum += desiredWeight * desiredWeight;
 
-    const Hash128 &hash = thread.board.pos_hash;
-    FeatureVector featureVector(memoryPtr->getFeatureDim());
-    for (int i = 0; i < memoryPtr->getFeatureDim(); i++) {
-      featureVector[i] = node.nnOutput->whiteOwnerMap[i];
-    }
+  }
 
-    if (memoryUpdateSchema == 0) {
-      memoryPtr->update(hash, featureVector, utility, numVisitsToAdd, thread.logger);
-    } else if (memoryUpdateSchema == 1) {
-      memoryPtr->update(hash, featureVector, utilitySum / (node.stats.visits + numVisitsToAdd),
-          node.stats.visits + numVisitsToAdd, thread.logger);
-      if (memoryPtr->isFull()) {
-        utilitySum = ((1 - memoryLambda) * utilitySum) + (memoryLambda * nodeNetMemUtility * (node.stats.visits + numVisitsToAdd));
-      }
-    } else if (memoryUpdateSchema == 2) {
-      auto queryResult = memoryPtr->query(featureVector, thread.logger);
-      memoryPtr->update(hash, featureVector, utilitySum / node.stats.visits + numVisitsToAdd,
-          node.stats.visits + numVisitsToAdd, thread.logger);
-      double queriedUtility = queryResult.first;
-      utilitySum = ((1 - memoryLambda) * utilitySum) + (memoryLambda * queriedUtility * node.stats.visits);
+  const Hash128 &hash = thread.board.pos_hash;
+  FeatureVector featureVector(memoryPtr->getFeatureDim());
+  for (int i = 0; i < memoryPtr->getFeatureDim(); i++) {
+    featureVector[i] = node.nnOutput->whiteOwnerMap[i];
+  }
+
+  if (memoryUpdateSchema == 0) {
+    memoryPtr->update(hash, featureVector, utility, numVisitsToAdd, thread.logger);
+  } else if (memoryUpdateSchema == 1) {
+    memoryPtr->update(hash, featureVector, utilitySum / (node.stats.visits + numVisitsToAdd),
+        node.stats.visits + numVisitsToAdd, thread.logger);
+    if (memoryPtr->isFull()) {
+      utilitySum = ((1 - memoryLambda) * utilitySum) + (memoryLambda * nodeNetMemUtility * (node.stats.visits + numVisitsToAdd));
     }
+  } else if (memoryUpdateSchema == 2) {
+    auto queryResult = memoryPtr->query(featureVector, thread.logger);
+    memoryPtr->update(hash, featureVector, utilitySum / node.stats.visits + numVisitsToAdd,
+        node.stats.visits + numVisitsToAdd, thread.logger);
+    double queriedUtility = queryResult.first;
+    utilitySum = ((1 - memoryLambda) * utilitySum) + (memoryLambda * queriedUtility * node.stats.visits);
   }
 
 
@@ -1730,7 +1731,7 @@ void Search::addLeafValue(SearchNode& node, SearchThread& thread, double winValu
       memUtility = queryResult.first;
       memVisits = queryResult.second;
       utilitySum = ((1 - memoryLambda) * utilitySum) + (memoryLambda * memUtility * node.stats.visits);
-      memoryPtr->update(hash, featureVector, utilitySum / node.stats.visits + 1, node.stats.visits + 1, thread.logger);
+      memoryPtr->update(hash, featureVector, utilitySum / (node.stats.visits + 1), node.stats.visits + 1, thread.logger);
     }
   }
 

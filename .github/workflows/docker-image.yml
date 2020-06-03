@@ -17,7 +17,7 @@ jobs:
     - name: Login Github Packages Registry
       env:
         TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: docker login -u uduse https://docker.pkg.github.com -p "%GITHUB_TOKEN%"
+      run: docker login -u uduse https://docker.pkg.github.com -p "%TOKEN%"
     - name: Build the Docker image
       run: docker build . --tag docker.pkg.github.com/uduse/katago/katago:$(git rev-parse --abbrev-ref HEAD | sed 's/\//_/g')
     - name: Push the Docker image

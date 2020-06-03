@@ -84,8 +84,8 @@ struct SearchParams {
   double searchFactorAfterTwoPass; //Multiply playouts and visits and time by this after two passes by the opponent
 
   // MMCTS
-  int64_t memorySize;
-  int64_t memoryNumNeighbors;
+  uint64_t memorySize;
+  uint64_t memoryNumNeighbors;
   double memoryLambda;
   uint64_t memoryUpdateSchema;
 

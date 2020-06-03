@@ -150,7 +150,11 @@ Search::Search(SearchParams params, NNEvaluator* nnEval, const string& rSeed)
    randSeed(rSeed),
    normToTApproxZ(0.0),
    nnEvaluator(nnEval),
-   nonSearchRand(rSeed + string("$nonSearchRand"))
+   nonSearchRand(rSeed + string("$nonSearchRand")),
+   memorySize(params.memorySize),
+   memoryNumNeighbors(params.memoryNumNeighbors),
+   memoryLambda(params.memoryLambda),
+   memoryUpdateSchema(params.memoryUpdateSchema)
 {
   nnXLen = nnEval->getNNXLen();
   nnYLen = nnEval->getNNYLen();
@@ -174,12 +178,6 @@ Search::Search(SearchParams params, NNEvaluator* nnEval, const string& rSeed)
 
   rootHistory.clear(rootBoard,rootPla,Rules(),0);
   rootKoHashTable->recompute(rootHistory);
-
-  // MMCTS config initialization
-  memorySize = params.memorySize;
-  memoryNumNeighbors = params.memoryNumNeighbors;
-  memoryLambda = params.memoryLambda;
-  memoryUpdateSchema = params.memoryUpdateSchema;
 
   const uint64_t featureDim = nnXLen * nnYLen;
   std::unique_ptr<Aggregator> aggregatorPtr = std::make_unique<AverageAggregator>();

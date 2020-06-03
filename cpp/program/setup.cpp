@@ -310,11 +310,11 @@ vector<SearchParams> Setup::loadParams(
     if(cfg.contains("maxTime"+idxStr)) params.maxTime = cfg.getDouble("maxTime"+idxStr, 0.0, 1.0e20);
     else if(cfg.contains("maxTime"))   params.maxTime = cfg.getDouble("maxTime",        0.0, 1.0e20);
 
-    if(cfg.contains("memorySize"))
+    if(cfg.contains("memorySize_"))
     {
-      params.memorySize = cfg.getInt64("memorySize", (int64_t) 100, (int64_t) 65535);
+      params.memorySize = cfg.getUInt64("memorySize_", (uint64_t) 100, (uint64_t) 65535);
     } else {
-      params.memorySize = (int64_t) 2000;
+      params.memorySize = (uint64_t) 2000;
     }
 
     if (cfg.contains("memoryLambda")) {

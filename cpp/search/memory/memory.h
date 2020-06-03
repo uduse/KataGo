@@ -49,16 +49,16 @@ public:
   [[nodiscard]] size_t size() const;
   [[nodiscard]] std::string toString() const;
 
-  const uint64_t getFeatureDim() const;
+  uint64_t getFeatureDim() const;
 
 private:
-  const uint64_t featureDim;
-  const uint64_t memorySize;
-  const uint64_t numNeighbors;
-  std::unique_ptr<Aggregator> aggregatorPtr;
+  const uint64_t featureDim_;
+  const uint64_t memorySize_;
+  const uint64_t numNeighbors_;
+  std::unique_ptr<Aggregator> aggregatorPtr_;
 
-  EntryContainer entries;
-  uint64_t touchCounter;
+  EntryContainer entries_;
+  uint64_t touchCounter_;
 
   void touchEntriesByHashes(const std::vector<Hash128> &NNHashes);
 };

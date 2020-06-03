@@ -1,7 +1,8 @@
 FROM nvidia/cuda:10.2-cudnn7-devel
-RUN apt-get update && \
-    apt-get -y install git gcc wget unzip zlib1g-dev libzip-dev \
+RUN apt-get update \
+    && apt-get -y install git gcc wget unzip npm zlib1g-dev libzip-dev \
     libboost-filesystem-dev ocl-icd-opencl-dev build-essential default-jre gconf2
+RUN npm install -g gnomon
 
 # initialize directories
 RUN git clone https://github.com/uduse/KataGo.git /KataGo
@@ -29,7 +30,8 @@ RUN cmake . -DBUILD_MCTS=1 -DUSE_BACKEND=CUDA && make -j$(nproc)
 
 # gogui setup
 WORKDIR /gogui/
-RUN sed 's/sudo apt install/apt-get install -y/g' ubuntu_setup.sh > temp.sh && sh temp.sh
+RUN sed 's/sudo apt install/apt-get install -y/g' ubuntu_setup.sh > temp.sh \
+    && sh temp.sh \
+    && ./install.sh
 
 WORKDIR /tournaments
-CMD sh run.sh

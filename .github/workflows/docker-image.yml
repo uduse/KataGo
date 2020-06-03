@@ -1,0 +1,17 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ master, mmcts/* ]
+  pull_request:
+    branches: [ master, mmcts/* ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag katago-mmcts:$(date +%s)

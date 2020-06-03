@@ -14,5 +14,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker build . --tag katago-mmcts:$(date +%s)
+    - name: Publish Image
+      uses: craftech-io/package-action@v3.0.0
+      with:
+        tags: latest
+        access_token: ${{ secrets.GITHUB_TOKEN }}
+#    - uses: docker/build-push-action@v1
+#      with:
+#        username: ${{ secrets.DOCKER_USERNAME }}
+#        password: ${{ secrets.DOCKER_PASSWORD }}
+#        repository:
+#    - name: Build the Docker image
+#      run: docker build . --tag katago-mmcts:$(date +'%m-%d_%H:%M:%S')
+#    - name: Push the Docker image
+#      run: docker push

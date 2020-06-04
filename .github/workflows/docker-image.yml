@@ -21,4 +21,4 @@ jobs:
     - name: Build the Docker image
       run: docker build . --tag docker.pkg.github.com/uduse/katago/katago:$(git rev-parse --abbrev-ref HEAD | sed 's/\//_/g')
     - name: Push the Docker image
-      run: docker push --tag docker.pkg.github.com/uduse/katago/katago:$(git rev-parse --abbrev-ref HEAD | sed 's/\//_/g')
+      run: docker push docker.pkg.github.com/uduse/katago/katago:$(git rev-parse --abbrev-ref HEAD | sed 's/\//_/g')

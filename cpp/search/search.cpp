@@ -279,6 +279,7 @@ void Search::setNNEval(NNEvaluator* nnEval) {
 void Search::clearSearch() {
   delete rootNode;
   rootNode = NULL;
+  memoryPtr->clear();
 }
 
 bool Search::isLegalTolerant(Loc moveLoc, Player movePla) const {

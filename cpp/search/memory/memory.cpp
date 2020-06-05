@@ -141,3 +141,7 @@ uint64_t Memory::getFeatureDim() const {
   return featureDim_;
 }
 
+void Memory::clear() {
+  entries_.clear();
+}
+

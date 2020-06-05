@@ -45,6 +45,7 @@ public:
 
   bool isFull() const;
   bool hasHash(const Hash128 &hash);
+  void clear();
 
   [[nodiscard]] size_t size() const;
   [[nodiscard]] std::string toString() const;

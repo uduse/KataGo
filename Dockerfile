@@ -14,8 +14,8 @@ RUN git clone https://github.com/Remi-Coulom/gogui.git /gogui
 RUN wget https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2.tar.gz \
     && tar -zxvf cmake-3.15.2.tar.gz \
     && cd cmake-3.15.2 \
-    && ./bootstrap \
-    && make -j$(nproc) \
+    && ./bootstrap > /dev/null 2>&1 \
+    && make -j$(nproc) > /dev/null 2>&1 \
     && make install
 
 # KataGo with MMCTS implementation

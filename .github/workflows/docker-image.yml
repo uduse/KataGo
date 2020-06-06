@@ -19,5 +19,5 @@ jobs:
         username: $GITHUB_ACTOR
         registry: docker.pkg.github.com
         password: ${{ secrets.GITHUB_TOKEN }}
-        repository: uduse/katago
+        repository: uduse/katago/katago
         tag_with_ref: true

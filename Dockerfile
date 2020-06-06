@@ -4,19 +4,19 @@ RUN apt-get update \
     libboost-filesystem-dev ocl-icd-opencl-dev build-essential default-jre gconf2
 RUN npm install -g gnomon
 
-# initialize directories
-RUN git clone https://github.com/uduse/KataGo.git /KataGo
-RUN git clone https://github.com/uduse/KataGo.git /KataGo_orig
-RUN git clone https://github.com/uduse/gogui-twogtp-tournaments-setup /tournaments
-RUN git clone https://github.com/Remi-Coulom/gogui.git /gogui
-
 # katago somehow only works with this newer version of cmake
 RUN wget https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2.tar.gz \
     && tar -zxvf cmake-3.15.2.tar.gz \
     && cd cmake-3.15.2 \
     && ./bootstrap > /dev/null 2>&1 \
     && make -j$(nproc) > /dev/null 2>&1 \
-    && make install
+    && make install > /dev/null 2>&1
+
+# initialize directories
+RUN git clone https://github.com/uduse/KataGo.git /KataGo
+RUN git clone https://github.com/uduse/KataGo.git /KataGo_orig
+RUN git clone https://github.com/uduse/gogui-twogtp-tournaments-setup /tournaments
+RUN git clone https://github.com/Remi-Coulom/gogui.git /gogui
 
 # KataGo with MMCTS implementation
 WORKDIR /KataGo/cpp/

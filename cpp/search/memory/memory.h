@@ -40,8 +40,8 @@ public:
   );
 
   void update(const Hash128 &hash, const FeatureVector &featureVector, const double &value,
-              const uint64_t &numVisits, Logger *logger = nullptr);
-  std::pair<double, int> query(const FeatureVector &featureVector, Logger *logger = nullptr);
+              const double &numVisits, Logger *logger = nullptr);
+  std::pair<double, double> query(const FeatureVector &featureVector, Logger *logger = nullptr);
 
   bool isFull() const;
   bool hasHash(const Hash128 &hash);

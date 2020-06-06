@@ -9,7 +9,7 @@
 
 class Aggregator {
 public:
-  [[nodiscard]] virtual std::pair<double, int> Aggregate(
+  [[nodiscard]] virtual std::pair<double, double> Aggregate(
       const std::vector<std::shared_ptr<MemoryEntry>> &vectors,
       const std::vector<double> &distances
   ) const;
@@ -18,7 +18,7 @@ public:
 
 class AverageAggregator : public Aggregator {
 public:
-  [[nodiscard]] std::pair<double, int> Aggregate(
+  [[nodiscard]] std::pair<double, double> Aggregate(
       const std::vector<std::shared_ptr<MemoryEntry>> &vectors,
       const std::vector<double> &distances
   ) const override;
@@ -26,7 +26,7 @@ public:
 
 class WeightedAverageAggregator : public Aggregator {
 public:
-  [[nodiscard]] std::pair<double, int> Aggregate(
+  [[nodiscard]] std::pair<double, double> Aggregate(
       const std::vector<std::shared_ptr<MemoryEntry>> &vectors,
       const std::vector<double> &distances
   ) const override;
@@ -36,7 +36,7 @@ class WeightedSoftmaxAggregator : public Aggregator {
 public:
   explicit WeightedSoftmaxAggregator(double Temperature);
 
-  [[nodiscard]] std::pair<double, int> Aggregate(
+  [[nodiscard]] std::pair<double, double> Aggregate(
       const std::vector<std::shared_ptr<MemoryEntry>> &vectors,
       const std::vector<double> &distances
   ) const override;

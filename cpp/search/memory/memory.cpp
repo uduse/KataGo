@@ -24,14 +24,10 @@ void Memory::update(
     const Hash128 &hash,
     const FeatureVector &featureVector,
     const double &value,
-    const uint64_t &numVisits,
+    const double &numVisits,
     Logger *logger
 ) {
   assert(featureVector.size() == featureDim_);
-
-  if (logger && touchCounter_ % 1000 == 0) {
-    logger->write(toString());
-  }
 
   MemoryEntry entry(
       hash,
@@ -52,12 +48,9 @@ void Memory::update(
       indexByTouchStamp.erase(indexByTouchStamp.begin());
     }
   }
-  if (logger) {
-    logger->write("Update - Size: " + std::to_string(entries_.size()));
-  }
 }
 
-std::pair<double, int> Memory::query(const FeatureVector &featureVector, Logger *logger) {
+std::pair<double, double> Memory::query(const FeatureVector &featureVector, Logger *logger) {
 
   auto &indexByHash = entries_.get<0>();
 
@@ -88,16 +81,7 @@ std::pair<double, int> Memory::query(const FeatureVector &featureVector, Logger 
 
   touchEntriesByHashes(topNeighbors);
 
-//  for (const auto &entryPtr : entryPtrs) {
-//    logger->write("entryPtr->value" + std::to_string(entryPtr->value));
-//  }
-
   auto result = aggregatorPtr_->Aggregate(entryPtrs, distances);
-
-  if (logger) {
-    logger->write("Query - ");
-  }
-
   return result;
 }
 
@@ -143,5 +127,6 @@ uint64_t Memory::getFeatureDim() const {
 
 void Memory::clear() {
   entries_.clear();
+  touchCounter_ = 0;
 }
 

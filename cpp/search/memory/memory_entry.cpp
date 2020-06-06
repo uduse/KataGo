@@ -9,7 +9,7 @@ MemoryEntry::MemoryEntry(
     const uint64_t &touchStamp,
     FeatureVector featureVector,
     const double &value,
-    const uint64_t &numVisits
+    const double &numVisits
 )
     : hash{hash},
       touchStamp{touchStamp},

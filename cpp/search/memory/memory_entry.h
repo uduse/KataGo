@@ -10,7 +10,7 @@ public:
       const uint64_t &touchStamp,
       FeatureVector featureVector,
       const double &value,
-      const uint64_t &numVisits
+      const double &numVisits
   );
 
   Hash128 hash;
@@ -18,7 +18,7 @@ public:
 
   FeatureVector featureVector;
   double value;
-  uint64_t numVisits;
+  double numVisits;
 
   [[nodiscard]] std::string toString() const;
 };

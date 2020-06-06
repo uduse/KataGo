@@ -395,7 +395,8 @@ private:
     bool isRoot
   ) const;
 
-  void addLeafValue(SearchNode &node, SearchThread &thread, double winValue, double noResultValue, double scoreMean, double scoreMeanSq, double lead, int32_t virtualLossesToSubtract);
+  void addLeafValue(SearchNode &node, SearchThread &thread, double winValue,
+      double noResultValue, double scoreMean, double scoreMeanSq, double lead, int32_t virtualLossesToSubtract, bool isTerminal);
 
   void maybeRecomputeExistingNNOutput(
     SearchThread& thread, SearchNode& node, bool isRoot
@@ -428,6 +429,7 @@ private:
 
   double getAverageTreeOwnershipHelper(std::vector<double>& accum, int64_t minVisits, double desiredWeight, const SearchNode* node) const;
 
+  std::pair<double, double> blendWithMemory(const SearchNode &node, const SearchThread &thread, const double &utility, const double &weight);
 };
 
 #endif  // SEARCH_SEARCH_H_

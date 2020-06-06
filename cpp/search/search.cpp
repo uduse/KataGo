@@ -6,6 +6,7 @@
 #include "../search/search.h"
 
 #include <algorithm>
+#include <cmath>
 
 #include "../core/fancymath.h"
 #include "../core/timer.h"
@@ -181,7 +182,7 @@ Search::Search(SearchParams params, NNEvaluator* nnEval, const string& rSeed)
   rootKoHashTable->recompute(rootHistory);
 
   const uint64_t featureDim = nnXLen * nnYLen;
-  std::unique_ptr<Aggregator> aggregatorPtr = std::make_unique<AverageAggregator>();
+  std::unique_ptr<Aggregator> aggregatorPtr = std::make_unique<WeightedSoftmaxAggregator>(memoryTemperature);
   memoryPtr = std::make_unique<Memory>(
       featureDim,
       memorySize,
@@ -1609,6 +1610,10 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
       getResultUtility(winProb, noResultProb)
       + getScoreUtility(scoreMean, scoreMeanSq, 1.0);
 
+    auto blending = blendWithMemory(node, thread, utility, desiredWeight);
+    utility = blending.first;
+    desiredWeight += blending.second;
+
     winValueSum += winProb * desiredWeight;
     noResultValueSum += noResultProb * desiredWeight;
     scoreMeanSum += scoreMean * desiredWeight;
@@ -1649,13 +1654,22 @@ void Search::runSinglePlayout(SearchThread& thread) {
   thread.history = rootHistory;
 }
 
-void Search::addLeafValue(SearchNode &node, SearchThread &thread, double winValue, double noResultValue, double scoreMean, double scoreMeanSq, double lead, int32_t virtualLossesToSubtract) {
+void Search::addLeafValue(SearchNode &node, SearchThread &thread, double winValue,
+    double noResultValue, double scoreMean, double scoreMeanSq, double lead,
+    int32_t virtualLossesToSubtract, bool isTerminal) {
   double utility =
     getResultUtility(winValue, noResultValue)
     + getScoreUtility(scoreMean, scoreMeanSq, 1.0);
+  double weight = 1.0;
+
+  if (!isTerminal) {
+    auto blending = blendWithMemory(node, thread, utility, weight);
+    utility = blending.first;
+    weight += blending.second;
+  }
 
   while(node.statsLock.test_and_set(std::memory_order_acquire));
-  node.stats.visits += 1;
+  node.stats.visits += weight;
   node.stats.winValueSum += winValue;
   node.stats.noResultValueSum += noResultValue;
   node.stats.scoreMeanSum += scoreMean;
@@ -1663,8 +1677,8 @@ void Search::addLeafValue(SearchNode &node, SearchThread &thread, double winValu
   node.stats.leadSum += lead;
   node.stats.utilitySum += utility;
   node.stats.utilitySqSum += utility * utility;
-  node.stats.weightSum += 1.0;
-  node.stats.weightSqSum += 1.0;
+  node.stats.weightSum += weight;
+  node.stats.weightSqSum += weight * weight;
   node.virtualLosses -= virtualLossesToSubtract;
   node.statsLock.clear(std::memory_order_release);
 }
@@ -1754,7 +1768,7 @@ void Search::initNodeNNOutput(
   double scoreMeanSq = (double)node.nnOutput->whiteScoreMeanSq;
   double lead = (double)node.nnOutput->whiteLead;
 
-  addLeafValue(node, thread, winProb, noResultProb, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract);
+  addLeafValue(node, thread, winProb, noResultProb, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract, false);
 }
 
 void Search::playoutDescend(
@@ -1780,7 +1794,7 @@ void Search::playoutDescend(
       double scoreMean = 0.0;
       double scoreMeanSq = 0.0;
       double lead = 0.0;
-      addLeafValue(node, thread, winValue, noResultValue, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract);
+      addLeafValue(node, thread, winValue, noResultValue, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract, true);
       return;
     }
     else {
@@ -1789,7 +1803,7 @@ void Search::playoutDescend(
       double scoreMean = ScoreValue::whiteScoreDrawAdjust(thread.history.finalWhiteMinusBlackScore,searchParams.drawEquivalentWinsForWhite,thread.history);
       double scoreMeanSq = ScoreValue::whiteScoreMeanSqOfScoreGridded(thread.history.finalWhiteMinusBlackScore,searchParams.drawEquivalentWinsForWhite);
       double lead = scoreMean;
-      addLeafValue(node, thread, winValue, noResultValue, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract);
+      addLeafValue(node, thread, winValue, noResultValue, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract, true);
       return;
     }
   }
@@ -1876,4 +1890,29 @@ void Search::playoutDescend(
 
   //Update this node stats
   updateStatsAfterPlayout(node,thread,virtualLossesToSubtract,isRoot);
+}
+
+std::pair<double, double> Search::blendWithMemory(const SearchNode &node, const SearchThread &thread, const double &utility, const double &weight) {
+  double blendedUtility = utility;
+  double blendedWeight = 0;
+  if (node.nnOutput) {
+    float *ownership = node.nnOutput->whiteOwnerMap;
+    const Hash128 &hash = node.nnOutput->nnHash;
+    if (ownership) {
+      FeatureVector featureVector(ownership, ownership + memoryPtr->getFeatureDim());
+      if (memoryPtr->isFull()) {
+        auto queryResult = memoryPtr->query(featureVector);
+        double memUtility = queryResult.first;
+        auto memWeight = queryResult.second;
+        double discountFactor = 0.8;
+        double discountedLambda = memoryLambda *
+            std::pow(discountFactor, 1 + std::log1p(weight) * (weight + 1) / (memWeight + 1));
+        assert(0 <= discountedLambda && discountedLambda <= memoryLambda + 0.01);
+        blendedUtility = ((1 - discountedLambda) * utility) + (discountedLambda * memUtility);
+        blendedWeight = discountedLambda * memWeight;
+      }
+      memoryPtr->update(hash, featureVector, utility, weight, thread.logger);
+    }
+  }
+  return std::make_pair(blendedUtility, blendedWeight);
 }

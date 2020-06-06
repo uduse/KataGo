@@ -53,11 +53,11 @@ std::function<double()> utils::getRandomDoubleFactory() {
   return []() { return distribution(engine); };
 }
 
-double utils::cosineSimilarity(std::vector<double> lhs, std::vector<double> rhs) {
+double utils::cosineSimilarity(FeatureVector lhs, FeatureVector rhs) {
   assert(lhs.size() == rhs.size());
-  double numerator = 0;
-  double lhs_denom = 0;
-  double rhs_denom = 0;
+  float numerator = 0;
+  float lhs_denom = 0;
+  float rhs_denom = 0;
   for (int i = 0; i < lhs.size(); i++) {
     numerator += lhs[i] * rhs[i];
     lhs_denom += lhs[i] * lhs[i];

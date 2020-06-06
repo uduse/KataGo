@@ -9,7 +9,7 @@
 #include <functional>
 
 //typedef int32_t EntryID;
-typedef std::vector<double> FeatureVector;
+typedef std::vector<float> FeatureVector;
 
 namespace utils {
 
@@ -17,6 +17,6 @@ void timeIt(const std::function<void()> &func, const std::string &desc = "Time")
 std::string toString(const FeatureVector &vector);
 std::vector<double> softmax(const std::vector<double> &vector);
 std::function<double()> getRandomDoubleFactory();
-double cosineSimilarity(std::vector<double> lhs, std::vector<double> rhs);
+double cosineSimilarity(FeatureVector lhs, FeatureVector rhs);
 
 }

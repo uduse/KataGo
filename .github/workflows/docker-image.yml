@@ -21,4 +21,3 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
         repository: uduse/katago/katago
         tag_with_ref: true
-        always_pull: true

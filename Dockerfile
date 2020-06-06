@@ -1,29 +1,27 @@
 FROM nvidia/cuda:10.2-cudnn7-devel
-#RUN apt-get update \
-#    && apt-get -y install git gcc wget unzip npm zlib1g-dev libzip-dev \
-#    libboost-filesystem-dev ocl-icd-opencl-dev build-essential default-jre gconf2
-#RUN npm install -g gnomon
+RUN apt-get update \
+    && apt-get -y install git gcc wget unzip npm zlib1g-dev libzip-dev \
+    libboost-filesystem-dev ocl-icd-opencl-dev build-essential default-jre gconf2
+RUN npm install -g gnomon
 
 # katago somehow only works with this newer version of cmake
-#RUN wget https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2.tar.gz \
-#    && tar -zxvf cmake-3.15.2.tar.gz \
-#    && cd cmake-3.15.2 \
-#    && ./bootstrap > /dev/null 2>&1 \
-#    && make -j$(nproc) > /dev/null 2>&1 \
-#    && make install > /dev/null 2>&1
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2.tar.gz \
+    && tar -zxvf cmake-3.15.2.tar.gz \
+    && cd cmake-3.15.2 \
+    && ./bootstrap > /dev/null 2>&1 \
+    && make -j$(nproc) > /dev/null 2>&1 \
+    && make install > /dev/null 2>&1
 
 # initialize directories
 COPY . /KataGo
 COPY .git /KataGo/.git
 COPY . /KataGo_orig
 COPY .git /KataGo_orig/.git
-#RUN git clone https://github.com/uduse/gogui-twogtp-tournaments-setup /tournaments
-#RUN git clone https://github.com/Remi-Coulom/gogui.git /gogui
+RUN git clone https://github.com/uduse/gogui-twogtp-tournaments-setup /tournaments
+RUN git clone https://github.com/Remi-Coulom/gogui.git /gogui
 
 # KataGo with MMCTS implementation
 WORKDIR /KataGo/cpp/
-RUN ls -al
-RUN git checkout mmcts/base
 RUN cmake . -DBUILD_MCTS=1 -DUSE_BACKEND=CUDA && make -j$(nproc)
 
 # KataGo without modifications

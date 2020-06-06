@@ -1,6 +1,6 @@
 FROM nvidia/cuda:10.2-cudnn7-devel
 RUN apt-get update \
-    && apt-get -y install git gcc wget unzip npm zlib1g-dev libzip-dev \
+    && apt-get -y install vim git gcc wget unzip npm zlib1g-dev libzip-dev \
     libboost-filesystem-dev ocl-icd-opencl-dev build-essential default-jre gconf2
 RUN npm install -g gnomon
 

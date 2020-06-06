@@ -14,17 +14,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Docker Login
-      uses: azure/docker-login@v1
+    - uses: docker/build-push-action@v1
       with:
-        login-server: docker.pkg.github.com
         username: $GITHUB_ACTOR
+        registry: docker.pkg.github.com
         password: ${{ secrets.GITHUB_TOKEN }}
-#    - name: Login Github Packages Registry
-#      env:
-#        TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#      run: docker login -u uduse https://docker.pkg.github.com -p "%TOKEN%"
-#    - name: Build the Docker image
-#      run: docker build . --tag docker.pkg.github.com/uduse/katago:$(git rev-parse --abbrev-ref HEAD | sed 's/\//_/g')
-#    - name: Push the Docker image
-#      run: docker push docker.pkg.github.com/uduse/katago:$(git rev-parse --abbrev-ref HEAD | sed 's/\//_/g')
+        repository: uduse/katago
+        tag_with_ref: true

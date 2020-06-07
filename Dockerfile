@@ -15,7 +15,8 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2
 # initialize directories
 COPY . /KataGo
 COPY .git /KataGo/.git
-RUN cp -r /KataGo/. /KataGo_orig
+COPY . /KataGo_orig
+COPY .git /KataGo_orig/.git
 RUN git clone https://github.com/uduse/gogui-twogtp-tournaments-setup /tournaments
 RUN git clone https://github.com/Remi-Coulom/gogui.git /gogui
 
@@ -25,7 +26,7 @@ RUN cmake . -DBUILD_MCTS=1 -DUSE_BACKEND=CUDA && make -j$(nproc)
 
 # KataGo without modifications
 WORKDIR /KataGo_orig/cpp/
-RUN git checkout master
+RUN git fetch && git checkout master
 RUN cmake . -DBUILD_MCTS=1 -DUSE_BACKEND=CUDA && make -j$(nproc)
 
 # gogui setup

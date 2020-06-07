@@ -187,6 +187,8 @@ Search::Search(SearchParams params, NNEvaluator* nnEval, const string& rSeed)
       memoryNumNeighbors,
       aggregatorPtr
   );
+
+  setAlwaysIncludeOwnerMap(true);
 }
 
 Search::~Search() {

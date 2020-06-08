@@ -1610,6 +1610,31 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
     double scoreMean = (double)node.nnOutput->whiteScoreMean;
     double scoreMeanSq = (double)node.nnOutput->whiteScoreMeanSq;
     double lead = (double)node.nnOutput->whiteLead;
+    
+
+    if (memoryUpdateSchema == 3 && node.nnOutput != nullptr) {
+      Hash128 &hash = node.nnOutput->nnHash;
+      float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
+      if (whiteOwnerMapFeature) {
+        if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
+          auto query = memoryPtr->query(whiteOwnerMapFeature);
+          lead = mergeMemoryValue(lead, query.lead, memoryLambda);
+          scoreMean = mergeMemoryValue(scoreMean, query.scoreMean, memoryLambda);
+          noResultProb = mergeMemoryValue(noResultProb, query.noResultProb, memoryLambda);
+          winProb = mergeMemoryValue(winProb, query.winProb, memoryLambda);
+          scoreMeanSq = mergeMemoryValue(scoreMeanSq, query.scoreMeanSq, memoryLambda);          
+        }
+
+        MemoryNodeStats stats = MemoryNodeStats();
+        stats.winProb = winProb;
+        stats.noResultProb = noResultProb;
+        stats.scoreMean = scoreMean;
+        stats.scoreMeanSq = scoreMeanSq;
+        stats.lead = lead;
+        memoryPtr->update(hash, whiteOwnerMapFeature, stats);    
+      }
+    }
+    
     double utility =
       getResultUtility(winProb, noResultProb)
       + getScoreUtility(scoreMean, scoreMeanSq, 1.0);
@@ -1669,6 +1694,30 @@ void Search::runSinglePlayout(SearchThread& thread) {
 }
 
 void Search::addLeafValue(SearchNode &node, SearchThread &thread, double winValue, double noResultValue, double scoreMean, double scoreMeanSq, double lead, int32_t virtualLossesToSubtract, bool useMemory) {
+  
+  if (memoryUpdateSchema == 3 && node.nnOutput != nullptr) {
+    Hash128 &hash = node.nnOutput->nnHash;
+    float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
+    if (whiteOwnerMapFeature) {
+      if (useMemory && (memoryPtr->memArray.size() >= memoryPtr->numNeighbors)) {
+        auto query = memoryPtr->query(whiteOwnerMapFeature);
+        lead = mergeMemoryValue(lead, query.lead, memoryLambda);
+        scoreMean = mergeMemoryValue(scoreMean, query.scoreMean, memoryLambda);
+        noResultValue = mergeMemoryValue(noResultValue, query.noResultProb, memoryLambda);
+        winValue = mergeMemoryValue(winValue, query.winProb, memoryLambda);
+        scoreMeanSq = mergeMemoryValue(scoreMeanSq, query.scoreMeanSq, memoryLambda);
+      }
+
+      MemoryNodeStats stats = MemoryNodeStats();
+      stats.winProb = winValue;
+      stats.noResultProb = noResultValue;
+      stats.scoreMean = scoreMean;
+      stats.scoreMeanSq = scoreMeanSq;
+      stats.lead = lead;
+      memoryPtr->update(hash, whiteOwnerMapFeature, stats);
+    }
+  }
+
   double utility =
     getResultUtility(winValue, noResultValue)
     + getScoreUtility(scoreMean, scoreMeanSq, 1.0);
@@ -1676,8 +1725,8 @@ void Search::addLeafValue(SearchNode &node, SearchThread &thread, double winValu
   if (memoryUpdateSchema == 0 && node.nnOutput != nullptr) {
     Hash128 &hash = node.nnOutput->nnHash;
     float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
-    if (useMemory && whiteOwnerMapFeature) {
-      if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
+    if (whiteOwnerMapFeature) {
+      if (useMemory && (memoryPtr->memArray.size() >= memoryPtr->numNeighbors)) {
         auto query = memoryPtr->query(whiteOwnerMapFeature);
         utility = mergeMemoryValue(utility, query.utility, memoryLambda);
       }

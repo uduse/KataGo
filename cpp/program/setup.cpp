@@ -310,31 +310,23 @@ vector<SearchParams> Setup::loadParams(
     if(cfg.contains("maxTime"+idxStr)) params.maxTime = cfg.getDouble("maxTime"+idxStr, 0.0, 1.0e20);
     else if(cfg.contains("maxTime"))   params.maxTime = cfg.getDouble("maxTime",        0.0, 1.0e20);
 
-    if(cfg.contains("memorySize_"))
+    if(cfg.contains("memorySize"))
     {
-      params.memorySize = cfg.getUInt64("memorySize_", (uint64_t) 100, (uint64_t) 65535);
-    } else {
-      params.memorySize = (uint64_t) 2000;
+      params.memorySize = cfg.getUInt64("memorySize", (uint64_t) 100, (uint64_t) 65535);
     }
 
     if (cfg.contains("memoryLambda")) {
       params.memoryLambda = cfg.getDouble("memoryLambda", (double) 0.001, (double) 1);
-    } else {
-      params.memoryLambda = (double) 0.05;
     }
 
     if (cfg.contains("memoryNumNeighbors")) {
       params.memoryNumNeighbors = cfg.getUInt64(
           "memoryNumNeighbors", (uint64_t) 2, (uint64_t) 128);
-    } else {
-      params.memoryNumNeighbors = (uint64_t) 8;
     }
 
     if (cfg.contains("memoryUpdateSchema")) {
       params.memoryUpdateSchema = cfg.getUInt64(
-          "memoryUpdateSchema", (uint64_t) 0, (uint64_t) 2);
-    } else {
-      params.memoryUpdateSchema = (uint64_t) 0;
+          "memoryUpdateSchema", (uint64_t) 0, (uint64_t) 10);
     }
 
     if(cfg.contains("maxPlayoutsPondering"+idxStr)) params.maxPlayoutsPondering = cfg.getInt64("maxPlayoutsPondering"+idxStr, (int64_t)1, (int64_t)1 << 50);

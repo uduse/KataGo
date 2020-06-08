@@ -1620,7 +1620,7 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
       if (whiteOwnerMapFeature) {
         if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
           auto query = memoryPtr->query(whiteOwnerMapFeature);
-          utility = mergeMemoryValue(utility, query.utility, memoryLambda);  
+          utility = mergeMemoryValue(utility, query.utility, memoryLambda);
         }
         MemoryNodeStats stats = MemoryNodeStats();
         stats.utility = utility;

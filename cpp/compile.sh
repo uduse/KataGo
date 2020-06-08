@@ -1,0 +1,2 @@
+cmake . -DBUILD_MCTS=1 -DUSE_BACKEND=OPENCL
+make

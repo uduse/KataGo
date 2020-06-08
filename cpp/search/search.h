@@ -16,7 +16,7 @@
 #include "../search/searchparams.h"
 #include "../search/searchprint.h"
 #include "../search/timecontrols.h"
-#include "../search/memory/memory.h"
+#include "../search/DyMeNNS/memory.h"
 
 struct SearchNode;
 struct SearchThread;
@@ -394,7 +394,7 @@ private:
     bool isRoot
   ) const;
 
-  void addLeafValue(SearchNode &node, SearchThread &thread, double winValue, double noResultValue, double scoreMean, double scoreMeanSq, double lead, int32_t virtualLossesToSubtract);
+  void addLeafValue(SearchNode &node, SearchThread &thread, double winValue, double noResultValue, double scoreMean, double scoreMeanSq, double lead, int32_t virtualLossesToSubtract, bool useMemory);
 
   void maybeRecomputeExistingNNOutput(
     SearchThread& thread, SearchNode& node, bool isRoot

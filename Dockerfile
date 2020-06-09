@@ -15,7 +15,6 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2
 # initialize directories
 COPY . /KataGo
 COPY .git /KataGo/.git
-RUN git clone https://github.com/uduse/gogui-twogtp-tournaments-setup /tournaments
 RUN git clone https://github.com/Remi-Coulom/gogui.git /gogui
 RUN git clone https://github.com/lightvector/KataGo.git /KataGo_orig
 

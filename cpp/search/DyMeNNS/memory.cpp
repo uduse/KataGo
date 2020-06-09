@@ -1,22 +1,6 @@
 #include "memory.h"
 using namespace std;
 
-double cosine_similarity(vector<double> A, vector<double> B){
-	if(A.size() != B.size()){
-		cerr << "Wrong input to cosine_function" << endl;
-		return 0;
-	}
-	double numerator= 0;
-	double a_denom = 0;
-	double b_denom = 0;
-	for(int i=0;i<A.size();i++){
-		numerator += A[i] * B[i];
-        a_denom += A[i] * A[i] ;
-        b_denom += B[i] * B[i] ;
-	}
-	return numerator/(a_denom*b_denom);
-}
-
 double cosine_similarity(float* A, float* B, int size){
 	double numerator= 0;
 	double a_denom = 0;
@@ -27,6 +11,10 @@ double cosine_similarity(float* A, float* B, int size){
         b_denom += B[i] * B[i] ;
 	}
 	return numerator/(a_denom*b_denom);
+}
+
+double mergeMemoryValue(const double actualValue, const double memoryValue, const double lambda) {
+  return ((1.0 - lambda)*actualValue) + (lambda*memoryValue);
 }
 
 Memory::Memory(int featureDim, int memorySize, int numNeighbors){

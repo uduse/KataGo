@@ -51,6 +51,9 @@ struct NodeStats {
   double weightSum;
   double weightSqSum;
 
+  double memoryUtilitySum;
+  double memoryUtilitySqSum;
+
   NodeStats();
   ~NodeStats();
 

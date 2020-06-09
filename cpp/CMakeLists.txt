@@ -171,6 +171,8 @@ add_executable(katago
   search/memory/memory.h
   search/memory/memory.cpp
 
+  search/DyMeNNS/utils.h
+  search/DyMeNNS/utils.cpp
   search/DyMeNNS/node.h
   search/DyMeNNS/node.cpp
   search/DyMeNNS/memory.h

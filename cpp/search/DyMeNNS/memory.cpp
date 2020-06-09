@@ -1,26 +1,31 @@
 #include "memory.h"
 using namespace std;
 
-double cosine_similarity(float* A, float* B, int size){
-	double numerator= 0;
-	double a_denom = 0;
-	double b_denom = 0;
-	for(int i=0;i<size;i++){
-		numerator += A[i] * B[i];
-        a_denom += A[i] * A[i] ;
-        b_denom += B[i] * B[i] ;
-	}
-	return numerator/(a_denom*b_denom);
-}
-
-double mergeMemoryValue(const double actualValue, const double memoryValue, const double lambda) {
-  return ((1.0 - lambda)*actualValue) + (lambda*memoryValue);
-}
-
-Memory::Memory(int featureDim, int memorySize, int numNeighbors){
+Memory::Memory(int featureDim, int memorySize_, int numNeighbors_){
 	this->featureDimension = featureDim;
-	this->memorySize = memorySize;
-	this->numNeighbors = numNeighbors;
+	this->memorySize = memorySize_;
+	this->numNeighbors = numNeighbors_;
+	this->aggregator = weighted_average;
+	this->tau = 0.1;
+}
+
+void Memory::setTau(double tau_){
+	this->tau = tau_;
+}
+
+void Memory::setAggregator(const char* aggregator_){
+	char* weighted_average_string = "weighted_average";
+	char* weighted_softmax_string = "weighted_softmax";
+	if(strcmp(weighted_average_string, aggregator_) == 0){
+		this->aggregator = weighted_average;
+		cout << "Aggregator set to weighted_average" << endl;
+	}
+	
+	if(strcmp(weighted_softmax_string, aggregator_) == 0){
+		this->aggregator = weighted_softmax;
+		cout << "Aggregator set to weighted_softmax" << endl;
+	}
+	return;
 }
 
 void Memory::update(Hash128 hash, float* featureVector, MemoryNodeStats stats){
@@ -53,7 +58,7 @@ void Memory::update(Hash128 hash, float* featureVector, MemoryNodeStats stats){
 }
 
 MemoryNodeStats Memory::query(float* featureVector){
-	priority_queue<pair<double, double> > top_neighbours;
+	priority_queue<pair<double, int> > top_neighbours;
 	double similarity;
 	for(int i=0;i<memArray.size();i++){
 		similarity = cosine_similarity(featureVector, memArray[i].feature, this->featureDimension);
@@ -63,41 +68,47 @@ MemoryNodeStats Memory::query(float* featureVector){
 		}
 	}
 
-	double utility = 0;
-	double visits = 0;
-	double similarity_sum = 0;
 	int index;
 	MemoryNodeStats stats = MemoryNodeStats();
-
+	double weight = 0;
+	double weightSum = 0;
+	
 	for(int i=0;i<this->numNeighbors;i++){
-		pair<double, double> result = top_neighbours.top();
+		pair<double, int> result = top_neighbours.top();
 		top_neighbours.pop();
-		
-		similarity = result.first;
+
+		if(this->aggregator == weighted_average){
+			weight = result.first;
+			weightSum += weight;
+		}
+
+		if(this->aggregator == weighted_softmax){
+			weight = exp(-result.first/this->tau);
+			weightSum += weight;
+		}
+
 		index = result.second;
-		similarity_sum += similarity;
 
-		stats.winProb += similarity * memArray[index].stats.winProb;
-		stats.noResultProb += similarity * memArray[index].stats.noResultProb;
-		stats.scoreMean += similarity * memArray[index].stats.scoreMean;
-		stats.scoreMeanSq += similarity * memArray[index].stats.scoreMeanSq;
-		stats.lead += similarity * memArray[index].stats.lead;
-		stats.utility += similarity * memArray[index].stats.utility;
-		stats.utilitySum += similarity * memArray[index].stats.utilitySum;
-		stats.utilitySqSum += similarity * memArray[index].stats.utilitySqSum;
-		stats.visits += similarity * memArray[index].stats.visits;
-
+		stats.winProb += weight * memArray[index].stats.winProb;
+		stats.noResultProb += weight * memArray[index].stats.noResultProb;
+		stats.scoreMean += weight * memArray[index].stats.scoreMean;
+		stats.scoreMeanSq += weight * memArray[index].stats.scoreMeanSq;
+		stats.lead += weight * memArray[index].stats.lead;
+		stats.utility += weight * memArray[index].stats.utility;
+		stats.utilitySum += weight * memArray[index].stats.utilitySum;
+		stats.utilitySqSum += weight * memArray[index].stats.utilitySqSum;
+		stats.visits += weight * memArray[index].stats.visits;
 	}
 
-	stats.winProb /= similarity_sum;
-	stats.noResultProb /= similarity_sum;
-	stats.scoreMean /= similarity_sum;
-	stats.scoreMeanSq /= similarity_sum;
-	stats.lead /= similarity_sum;
-	stats.utility /= similarity_sum;
-	stats.utilitySum /= similarity_sum;
-	stats.utilitySqSum /= similarity_sum;
-	stats.visits /= similarity_sum;
+	stats.winProb /= weightSum;
+	stats.noResultProb /= weightSum;
+	stats.scoreMean /= weightSum;
+	stats.scoreMeanSq /= weightSum;
+	stats.lead /= weightSum;
+	stats.utility /= weightSum;
+	stats.utilitySum /= weightSum;
+	stats.utilitySqSum /= weightSum;
+	stats.visits /= weightSum;
 
 	return stats;
 }

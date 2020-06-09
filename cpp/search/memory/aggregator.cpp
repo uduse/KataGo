@@ -54,7 +54,7 @@ std::pair<double, int> WeightedSoftmaxAggregator::Aggregate(
   const std::vector<double> &distances
 ) const {
   assert(entries.size() == distances.size());
-  auto weights = utils::softmax(distances);
+  auto weights = utils::softmax(distances, 0.1);
   assert(entries.size() == weights.size());
   double value = 0;
   int numVisits = 0;

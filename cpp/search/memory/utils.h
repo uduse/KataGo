@@ -15,7 +15,8 @@ namespace utils {
 
 void timeIt(const std::function<void()> &func, const std::string &desc = "Time");
 std::string toString(const FeatureVector &vector);
-std::vector<double> softmax(const std::vector<double> &vector);
+std::string toString(const std::vector<double> &vector);
+std::vector<double> softmax(const std::vector<double> &vector, const double &temperature = 1);
 std::function<double()> getRandomDoubleFactory();
 double cosineSimilarity(FeatureVector lhs, FeatureVector rhs);
 

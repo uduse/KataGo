@@ -28,20 +28,33 @@ std::string utils::toString(const FeatureVector &vector) {
   return "[" + boost::algorithm::join(strings, ", ") + "]";
 }
 
-std::vector<double> utils::softmax(const std::vector<double> &vector) {
+std::string utils::toString(const std::vector<double> &vector) {
+  std::vector<std::string> strings;
+  std::transform(
+      std::begin(vector),
+      std::end(vector),
+      std::back_inserter(strings),
+      [](auto &val) {
+        return std::to_string(val);
+      });
+  return "[" + boost::algorithm::join(strings, ", ") + "]";
+}
+
+std::vector<double> utils::softmax(const std::vector<double> &vector, const double &temperature) {
+  assert(0 < temperature && temperature < 10);
   std::vector<double> exps;
   std::transform(
       vector.begin(), vector.end(), std::back_inserter(exps),
-      [](const double &val) {
-        return std::exp(val);
+      [&temperature](const double &val) {
+        return std::exp(val / temperature);
       }
   );
   double exp_sum = std::accumulate(exps.begin(), exps.end(), 0.0);
   std::vector<double> result;
   std::transform(
       vector.begin(), vector.end(), std::back_inserter(result),
-      [&exp_sum](const double &val) {
-        return std::exp(val) / exp_sum;
+      [&exp_sum, &temperature](const double &val) {
+        return std::exp(val / temperature) / exp_sum;
       });
   return result;
 }
@@ -50,6 +63,7 @@ std::function<double()> utils::getRandomDoubleFactory() {
   static std::random_device random_device;
   static std::mt19937 engine{random_device()};
   static std::normal_distribution<double> distribution{0.0, 1.0};
+//  static std::uniform_real_distribution<double> distribution{0.0, 1.0};
   return []() { return distribution(engine); };
 }
 

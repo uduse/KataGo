@@ -1,7 +1,8 @@
 FROM nvidia/cuda:10.2-cudnn7-devel
 RUN apt-get update \
     && apt-get -y install vim git gcc wget unzip npm zlib1g-dev libzip-dev \
-    libboost-filesystem-dev ocl-icd-opencl-dev build-essential default-jre gconf2
+    libboost-filesystem-dev ocl-icd-opencl-dev build-essential default-jre gconf2 \
+    valgrind
 RUN npm install -g gnomon
 
 # katago somehow only works with this newer version of cmake
@@ -21,7 +22,7 @@ RUN git clone https://github.com/Remi-Coulom/gogui.git /gogui
 
 # KataGo with MMCTS implementation
 WORKDIR /KataGo/cpp/
-RUN cmake . -DBUILD_MCTS=1 -DUSE_BACKEND=CUDA && make -j$(nproc)
+RUN cmake . -DBUILD_MCTS=1 -DUSE_BACKEND=CUDA -DCMAKE_BUILD_TYPE=Debug && make -j$(nproc)
 
 # KataGo without modifications
 WORKDIR /KataGo_orig/cpp/

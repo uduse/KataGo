@@ -319,6 +319,10 @@ vector<SearchParams> Setup::loadParams(
       params.memoryLambda = cfg.getDouble("memoryLambda", (double) 0.001, (double) 1);
     }
 
+    if (cfg.contains("tau")) {
+      params.tau = cfg.getDouble("tau", (double) 0.001, (double) 1);
+    }
+
     if (cfg.contains("memoryNumNeighbors")) {
       params.memoryNumNeighbors = cfg.getUInt64(
           "memoryNumNeighbors", (uint64_t) 2, (uint64_t) 128);

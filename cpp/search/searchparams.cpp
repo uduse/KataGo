@@ -61,7 +61,8 @@ SearchParams::SearchParams()
    memorySize(2000),
    memoryNumNeighbors(8),
    memoryLambda(0.05),
-   memoryUpdateSchema(0)
+   memoryUpdateSchema(0),
+   tau(0.02)
 {}
 
 SearchParams::~SearchParams()

@@ -189,8 +189,9 @@ Search::Search(SearchParams params, NNEvaluator* nnEval, const string& rSeed)
   );
 
   memoryPtr->setAggregator("weighted_softmax");
+  memoryPtr->setTau(params.tau);
 
-  std::cout << "memorySize: " << memorySize << " memoryNumNeighbors: " << memoryNumNeighbors << " memoryLambda: " << memoryLambda << " memoryUpdateSchema: " << memoryUpdateSchema << std::endl;
+  std::cout << "memorySize: " << memorySize << " memoryNumNeighbors: " << memoryNumNeighbors << " memoryLambda: " << memoryLambda << " memoryUpdateSchema: " << memoryUpdateSchema << " tau: " << params.tau << std::endl;
 
   setAlwaysIncludeOwnerMap(true);
 }

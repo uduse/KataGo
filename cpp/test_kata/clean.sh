@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-rm -rf result-* gtp_logs
+rm -rf gtp_logs *.sgf *.lock

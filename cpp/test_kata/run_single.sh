@@ -4,8 +4,7 @@
 : ${NUM_THREADS:=1}
 
 NOW=$(date +"%T")
-CFG_FILENAME="param-${NOW}.cfg"
-python paramgen.py "$CFG_FILENAME"
+CFG_FILENAME="mmcts_extra.cfg"
 echo 'CONFIG_FILE:' $CFG_FILENAME
 echo 'NUM_THREADS:' $NUM_THREADS
 echo 'NUM_GAMES:' $NUM_GAMES

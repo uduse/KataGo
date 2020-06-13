@@ -337,6 +337,13 @@ vector<SearchParams> Setup::loadParams(
       params.memoryUpdateSchema = (uint64_t) 0;
     }
 
+    if (cfg.contains("memoryTemperature")) {
+      params.memoryTemperature = cfg.getDouble(
+          "memoryTemperature", (double) 0.001, (double) 2);
+    } else {
+      params.memoryTemperature = (double) 0.02;
+    }
+
     if(cfg.contains("maxPlayoutsPondering"+idxStr)) params.maxPlayoutsPondering = cfg.getInt64("maxPlayoutsPondering"+idxStr, (int64_t)1, (int64_t)1 << 50);
     else if(cfg.contains("maxPlayoutsPondering"))   params.maxPlayoutsPondering = cfg.getInt64("maxPlayoutsPondering",        (int64_t)1, (int64_t)1 << 50);
     else                                            params.maxPlayoutsPondering = (int64_t)1 << 50;

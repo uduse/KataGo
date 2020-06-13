@@ -34,8 +34,11 @@ public:
 
 class WeightedSoftmaxAggregator : public Aggregator {
 public:
+  explicit WeightedSoftmaxAggregator(double Temperature);
+
   [[nodiscard]] std::pair<double, int> Aggregate(
       const std::vector<std::shared_ptr<MemoryEntry>> &vectors,
       const std::vector<double> &distances
   ) const override;
+  double temperature_;
 };

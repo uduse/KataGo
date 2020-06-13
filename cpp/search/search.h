@@ -184,6 +184,7 @@ struct Search {
   double memoryLambda;
   uint64_t memoryNumNeighbors;
   uint64_t memoryUpdateSchema;
+  double memoryTemperature;
 
   //Note - randSeed controls a few things in the search, but a lot of the randomness actually comes from
   //random symmetries of the neural net evaluations, see nneval.h

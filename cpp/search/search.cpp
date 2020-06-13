@@ -154,7 +154,8 @@ Search::Search(SearchParams params, NNEvaluator* nnEval, const string& rSeed)
    memorySize(params.memorySize),
    memoryNumNeighbors(params.memoryNumNeighbors),
    memoryLambda(params.memoryLambda),
-   memoryUpdateSchema(params.memoryUpdateSchema)
+   memoryUpdateSchema(params.memoryUpdateSchema),
+   memoryTemperature(params.memoryTemperature)
 {
   nnXLen = nnEval->getNNXLen();
   nnYLen = nnEval->getNNYLen();

@@ -65,3 +65,4 @@ std::pair<double, int> WeightedSoftmaxAggregator::Aggregate(
   assert(0.0 <= value && value <= 1.0);
   return std::make_pair(value, numVisits);
 }
+WeightedSoftmaxAggregator::WeightedSoftmaxAggregator(double temperature) : temperature_(temperature) {}

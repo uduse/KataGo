@@ -36,7 +36,7 @@ RUN sed 's/sudo apt install/apt-get install -y/g' ubuntu_setup.sh > temp.sh \
     && ./install.sh
 
 # gomill setup
-WORKDIR /gomill/
-RUN cp /KataGo/Pipfile . && pip install pipenv && pipenv install
+WORKDIR /tournaments
+RUN pip install pipenv && pipenv install && pipenv shell
 
 WORKDIR /tournaments

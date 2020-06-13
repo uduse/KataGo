@@ -2,7 +2,7 @@ FROM nvidia/cuda:10.2-cudnn7-devel
 RUN apt-get update \
     && apt-get -y install vim git gcc wget unzip npm zlib1g-dev libzip-dev \
     libboost-filesystem-dev ocl-icd-opencl-dev build-essential default-jre gconf2 \
-    valgrind
+    valgrind python-pip
 RUN npm install -g gnomon
 
 # katago somehow only works with this newer version of cmake
@@ -14,11 +14,11 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2
     && make install > /dev/null 2>&1
 
 # initialize directories
+RUN git clone https://github.com/uduse/gogui-twogtp-tournaments-setup /tournaments
+RUN git clone https://github.com/Remi-Coulom/gogui.git /gogui
 COPY . /KataGo
 COPY .git /KataGo/.git
 RUN cp -r /KataGo /KataGo_orig
-RUN git clone https://github.com/uduse/gogui-twogtp-tournaments-setup /tournaments
-RUN git clone https://github.com/Remi-Coulom/gogui.git /gogui
 
 # KataGo with MMCTS implementation
 WORKDIR /KataGo/cpp/
@@ -34,5 +34,9 @@ WORKDIR /gogui/
 RUN sed 's/sudo apt install/apt-get install -y/g' ubuntu_setup.sh > temp.sh \
     && sh temp.sh \
     && ./install.sh
+
+# gomill setup
+WORKDIR /gomill/
+RUN cp /KataGo/Pipfile . && pip install pipenv && pipenv install
 
 WORKDIR /tournaments

@@ -37,6 +37,6 @@ RUN sed 's/sudo apt install/apt-get install -y/g' ubuntu_setup.sh > temp.sh \
 
 # gomill setup
 WORKDIR /tournaments
-RUN pip install pipenv && pipenv install && pipenv shell
+RUN pip install gomill
 
 WORKDIR /tournaments

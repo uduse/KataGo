@@ -1564,6 +1564,10 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
       memUtilitySqSums[numGoodChildren] = memUtilitySqSum;    
     }
 
+    if(memoryUpdateSchema == 2) {
+      memUtilitySums[numGoodChildren] = memUtilitySum;
+    }
+
     winValues[numGoodChildren] = winValueSum / weightSum;
     noResultValues[numGoodChildren] = noResultValueSum / weightSum;
     scoreMeans[numGoodChildren] = scoreMeanSum / weightSum;
@@ -1638,6 +1642,10 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
       memUtilitySqSum += weightScaling * memUtilitySqSums[i];
     }
 
+    if(memoryUpdateSchema == 2) {
+      memUtilitySum += weightScaling * memUtilitySums[i];
+    }
+
     utilitySqSum += weightScaling * utilitySqSums[i];
     weightSum += desiredWeight;
     weightSqSum += weightScaling * weightScaling * weightSqSums[i];
@@ -1662,6 +1670,15 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
       Hash128 &hash = node.nnOutput->nnHash;
       float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
       if (whiteOwnerMapFeature) {
+        
+        MemoryNodeStats stats = MemoryNodeStats();
+        stats.winProb = winProb;
+        stats.noResultProb = noResultProb;
+        stats.scoreMean = scoreMean;
+        stats.scoreMeanSq = scoreMeanSq;
+        stats.lead = lead;
+        memoryPtr->update(hash, whiteOwnerMapFeature, stats);    
+        
         if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
           auto query = memoryPtr->query(whiteOwnerMapFeature);
           lead = mergeMemoryValue(lead, query.lead, memoryLambda);
@@ -1670,14 +1687,6 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
           winProb = mergeMemoryValue(winProb, query.winProb, memoryLambda);
           scoreMeanSq = mergeMemoryValue(scoreMeanSq, query.scoreMeanSq, memoryLambda);          
         }
-
-        MemoryNodeStats stats = MemoryNodeStats();
-        stats.winProb = winProb;
-        stats.noResultProb = noResultProb;
-        stats.scoreMean = scoreMean;
-        stats.scoreMeanSq = scoreMeanSq;
-        stats.lead = lead;
-        memoryPtr->update(hash, whiteOwnerMapFeature, stats);    
       }
     }
 
@@ -1689,13 +1698,15 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
       Hash128 &hash = node.nnOutput->nnHash;
       float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
       if (whiteOwnerMapFeature) {
+        
+        MemoryNodeStats stats = MemoryNodeStats();
+        stats.utility = utility;
+        memoryPtr->update(hash, whiteOwnerMapFeature, stats);
+
         if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
           auto query = memoryPtr->query(whiteOwnerMapFeature);
           utility = mergeMemoryValue(utility, query.utility, memoryLambda);
         }
-        MemoryNodeStats stats = MemoryNodeStats();
-        stats.utility = utility;
-        memoryPtr->update(hash, whiteOwnerMapFeature, stats);
       }
     }
 
@@ -1716,6 +1727,20 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
         } 
     }
 
+    if (memoryUpdateSchema == 2 && node.nnOutput != nullptr) {
+        Hash128 &hash = node.nnOutput->nnHash;
+        float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
+        if (whiteOwnerMapFeature) {
+          if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
+            auto queryResult = memoryPtr->query(whiteOwnerMapFeature);
+            memUtilitySum += queryResult.utility * desiredWeight;
+          }
+          MemoryNodeStats stats = MemoryNodeStats();
+          stats.utility = utility;
+          memoryPtr->update(hash, whiteOwnerMapFeature, stats);
+        } 
+    }
+
     winValueSum += winProb * desiredWeight;
     noResultValueSum += noResultProb * desiredWeight;
     scoreMeanSum += scoreMean * desiredWeight;
@@ -1725,6 +1750,24 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
     utilitySqSum += utility * utility * desiredWeight;
     weightSum += desiredWeight;
     weightSqSum += desiredWeight * desiredWeight;
+  }
+
+  {
+    // Method 2
+    if (memoryUpdateSchema == 2) {
+      double utilityAvgBeforeMemory = utilitySum / weightSum;
+      double utilitySqAvgBeforeMemory = utilitySqSum / weightSum;
+
+      double varianceAvgBeforeMemory = utilitySqAvgBeforeMemory - (utilityAvgBeforeMemory * utilityAvgBeforeMemory);
+      
+      double utilityAvgMemory = memUtilitySum / weightSum;
+      double utilityAvgAfterMemory = mergeMemoryValue(utilityAvgBeforeMemory, utilityAvgMemory, memoryLambda);
+
+      double utilitySqAvgAfterMemory = varianceAvgBeforeMemory + (utilityAvgAfterMemory * utilityAvgAfterMemory);
+
+      utilitySum = utilityAvgAfterMemory * weightSum;
+      utilitySqSum = utilitySqAvgAfterMemory * weightSum;
+    }
   }
 
   while(node.statsLock.test_and_set(std::memory_order_acquire));
@@ -1744,6 +1787,10 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
   if (memoryUpdateSchema == 1) {
     node.stats.memoryUtilitySum = memUtilitySum;
     node.stats.memoryUtilitySqSum = memUtilitySqSum;
+  }
+
+  if (memoryUpdateSchema == 2) {
+    node.stats.memoryUtilitySum = memUtilitySum;
   }
 
   node.stats.weightSum = weightSum;
@@ -1768,6 +1815,14 @@ void Search::addLeafValue(SearchNode &node, SearchThread &thread, double winValu
     Hash128 &hash = node.nnOutput->nnHash;
     float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
     if (whiteOwnerMapFeature) {
+      MemoryNodeStats stats = MemoryNodeStats();
+      stats.winProb = winValue;
+      stats.noResultProb = noResultValue;
+      stats.scoreMean = scoreMean;
+      stats.scoreMeanSq = scoreMeanSq;
+      stats.lead = lead;
+      memoryPtr->update(hash, whiteOwnerMapFeature, stats);
+
       if (useMemory && (memoryPtr->memArray.size() >= memoryPtr->numNeighbors)) {
         auto query = memoryPtr->query(whiteOwnerMapFeature);
         lead = mergeMemoryValue(lead, query.lead, memoryLambda);
@@ -1776,14 +1831,6 @@ void Search::addLeafValue(SearchNode &node, SearchThread &thread, double winValu
         winValue = mergeMemoryValue(winValue, query.winProb, memoryLambda);
         scoreMeanSq = mergeMemoryValue(scoreMeanSq, query.scoreMeanSq, memoryLambda);
       }
-
-      MemoryNodeStats stats = MemoryNodeStats();
-      stats.winProb = winValue;
-      stats.noResultProb = noResultValue;
-      stats.scoreMean = scoreMean;
-      stats.scoreMeanSq = scoreMeanSq;
-      stats.lead = lead;
-      memoryPtr->update(hash, whiteOwnerMapFeature, stats);
     }
   }
 
@@ -1795,13 +1842,14 @@ void Search::addLeafValue(SearchNode &node, SearchThread &thread, double winValu
     Hash128 &hash = node.nnOutput->nnHash;
     float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
     if (whiteOwnerMapFeature) {
+      MemoryNodeStats stats = MemoryNodeStats();
+      stats.utility = utility;
+      memoryPtr->update(hash, whiteOwnerMapFeature, stats);
+
       if (useMemory && (memoryPtr->memArray.size() >= memoryPtr->numNeighbors)) {
         auto query = memoryPtr->query(whiteOwnerMapFeature);
         utility = mergeMemoryValue(utility, query.utility, memoryLambda);
       }
-      MemoryNodeStats stats = MemoryNodeStats();
-      stats.utility = utility;
-      memoryPtr->update(hash, whiteOwnerMapFeature, stats);
     }
   }
 
@@ -1811,17 +1859,31 @@ void Search::addLeafValue(SearchNode &node, SearchThread &thread, double winValu
     float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
     if (whiteOwnerMapFeature) {
       // We need to use this memory even in terminal state that is why we removed useMemory
+      MemoryNodeStats stats = MemoryNodeStats();
+      stats.utility = utility;
+      memoryPtr->update(hash, whiteOwnerMapFeature, stats);
+
       if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
         auto queryResult = memoryPtr->query(whiteOwnerMapFeature);
         double memUtility = queryResult.utility;
         node.stats.memoryUtilitySum += memUtility;
         node.stats.memoryUtilitySqSum += memUtility * memUtility;
       }
+    }
+  }
 
+  if (memoryUpdateSchema == 2 && node.nnOutput != nullptr) {
+    Hash128 &hash = node.nnOutput->nnHash;
+    float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
+    if (whiteOwnerMapFeature) {
+      // We need to use this memory even in terminal state that is why we removed useMemory
+      if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
+        auto queryResult = memoryPtr->query(whiteOwnerMapFeature);
+        node.stats.memoryUtilitySum += queryResult.utility;
+      }
       MemoryNodeStats stats = MemoryNodeStats();
       stats.utility = utility;
       memoryPtr->update(hash, whiteOwnerMapFeature, stats);
-
     }
   }
 

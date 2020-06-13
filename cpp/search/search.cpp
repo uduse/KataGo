@@ -1528,7 +1528,6 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
   int numChildren = node.numChildren;
   int numGoodChildren = 0;
 
-
   double memUtilitySums[numChildren];
   double memUtilitySqSums[numChildren];
 
@@ -1677,8 +1676,6 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
         stats.scoreMean = scoreMean;
         stats.scoreMeanSq = scoreMeanSq;
         stats.lead = lead;
-        memoryPtr->update(hash, whiteOwnerMapFeature, stats);    
-        
         if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
           auto query = memoryPtr->query(whiteOwnerMapFeature);
           lead = mergeMemoryValue(lead, query.lead, memoryLambda);
@@ -1687,6 +1684,7 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
           winProb = mergeMemoryValue(winProb, query.winProb, memoryLambda);
           scoreMeanSq = mergeMemoryValue(scoreMeanSq, query.scoreMeanSq, memoryLambda);          
         }
+        memoryPtr->update(hash, whiteOwnerMapFeature, stats);
       }
     }
 
@@ -1698,15 +1696,13 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
       Hash128 &hash = node.nnOutput->nnHash;
       float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
       if (whiteOwnerMapFeature) {
-        
         MemoryNodeStats stats = MemoryNodeStats();
         stats.utility = utility;
-        memoryPtr->update(hash, whiteOwnerMapFeature, stats);
-
         if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
           auto query = memoryPtr->query(whiteOwnerMapFeature);
           utility = mergeMemoryValue(utility, query.utility, memoryLambda);
         }
+        memoryPtr->update(hash, whiteOwnerMapFeature, stats);
       }
     }
 
@@ -1821,8 +1817,6 @@ void Search::addLeafValue(SearchNode &node, SearchThread &thread, double winValu
       stats.scoreMean = scoreMean;
       stats.scoreMeanSq = scoreMeanSq;
       stats.lead = lead;
-      memoryPtr->update(hash, whiteOwnerMapFeature, stats);
-
       if (useMemory && (memoryPtr->memArray.size() >= memoryPtr->numNeighbors)) {
         auto query = memoryPtr->query(whiteOwnerMapFeature);
         lead = mergeMemoryValue(lead, query.lead, memoryLambda);
@@ -1831,6 +1825,7 @@ void Search::addLeafValue(SearchNode &node, SearchThread &thread, double winValu
         winValue = mergeMemoryValue(winValue, query.winProb, memoryLambda);
         scoreMeanSq = mergeMemoryValue(scoreMeanSq, query.scoreMeanSq, memoryLambda);
       }
+      memoryPtr->update(hash, whiteOwnerMapFeature, stats);
     }
   }
 
@@ -1844,12 +1839,11 @@ void Search::addLeafValue(SearchNode &node, SearchThread &thread, double winValu
     if (whiteOwnerMapFeature) {
       MemoryNodeStats stats = MemoryNodeStats();
       stats.utility = utility;
-      memoryPtr->update(hash, whiteOwnerMapFeature, stats);
-
       if (useMemory && (memoryPtr->memArray.size() >= memoryPtr->numNeighbors)) {
         auto query = memoryPtr->query(whiteOwnerMapFeature);
         utility = mergeMemoryValue(utility, query.utility, memoryLambda);
       }
+      memoryPtr->update(hash, whiteOwnerMapFeature, stats);
     }
   }
 
@@ -1859,16 +1853,15 @@ void Search::addLeafValue(SearchNode &node, SearchThread &thread, double winValu
     float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
     if (whiteOwnerMapFeature) {
       // We need to use this memory even in terminal state that is why we removed useMemory
-      MemoryNodeStats stats = MemoryNodeStats();
-      stats.utility = utility;
-      memoryPtr->update(hash, whiteOwnerMapFeature, stats);
-
       if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
         auto queryResult = memoryPtr->query(whiteOwnerMapFeature);
         double memUtility = queryResult.utility;
         node.stats.memoryUtilitySum += memUtility;
         node.stats.memoryUtilitySqSum += memUtility * memUtility;
       }
+      MemoryNodeStats stats = MemoryNodeStats();
+      stats.utility = utility;
+      memoryPtr->update(hash, whiteOwnerMapFeature, stats);
     }
   }
 

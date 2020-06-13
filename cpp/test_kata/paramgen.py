@@ -4,7 +4,7 @@ import sys
 lambdaParam = random.uniform(0.05, 0.5)
 memory_size = random.choice([1000, 3000, 5000, 10000])
 num_neighbours = random.choice([6, 12, 24, 48])
-UpdateSchema = random.choice([0, 1, 3])
+UpdateSchema = random.choice([0, 1, 2, 3])
 tau = random.choice([0.02, 0.1, 0.5, 1])
 
 # print("memorySize = " + str(memory_size))

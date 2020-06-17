@@ -180,6 +180,7 @@ Search::Search(SearchParams params, NNEvaluator* nnEval, const string& rSeed)
   rootHistory.clear(rootBoard,rootPla,Rules(),0);
   rootKoHashTable->recompute(rootHistory);
 
+  std::cout << "nnXLen" << nnXLen << "nnYLen" << nnYLen << std::endl;
   const uint64_t featureDim = nnXLen * nnYLen;
   std::unique_ptr<Aggregator> aggregatorPtr = std::make_unique<AverageAggregator>();
   memoryPtr = std::make_unique<Memory>(
@@ -1653,6 +1654,20 @@ void Search::addLeafValue(SearchNode &node, SearchThread &thread, double winValu
   double utility =
     getResultUtility(winValue, noResultValue)
     + getScoreUtility(scoreMean, scoreMeanSq, 1.0);
+
+  if (node.nnOutput) {
+    float *ownership = node.nnOutput->whiteOwnerMap;
+    float whiteWinProb = node.nnOutput->whiteWinProb;
+    std::string repr;
+    repr += "DATA_LOG:";
+    repr += std::to_string(whiteWinProb);
+    repr += '\t';
+    for (int i = 0; i < memoryPtr->getFeatureDim(); i++) {
+      repr += std::to_string(ownership[i]);
+      repr += '\t';
+    }
+    thread.logger->write(repr);
+  }
 
   while(node.statsLock.test_and_set(std::memory_order_acquire));
   node.stats.visits += 1;

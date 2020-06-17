@@ -1,0 +1,149 @@
+f = open('log.log')
+f.read().splitlines()
+lines = f.read().splitlines()
+lines
+f = open('log.log')
+lines = f.read().splitlines()
+len(lines)
+import
+import random
+selected = random.sample(lines, 10000)
+def parse(line):
+    win_prob, *owners = line.split('\t')
+    win_prob = float(win_prob)
+    owners = [float(x) for x in owners]
+    assert len(owners == 19 * 19)
+    return win_prob, owners
+parse(selected[0])
+def parse(line):
+    line.index
+    win_prob, *owners = line.split('\t')
+    win_prob = float(win_prob)
+    owners = [float(x) for x in owners]
+    assert len(owners == 19 * 19)
+    return win_prob, owners
+l = selected[0]
+l
+l.index('REPR')
+l.sub(l.index('REPR'))
+l.substr(l.index('REPR'))
+ll = l[l.index('REPR'):]
+ll
+ll = l[l.index('REPR:'+5):]
+ll = l[l.index('REPR:')+5:]
+ll
+def parse(line):
+    line = [line.index('REPR:')+5:]
+    win_prob, *owners = line.split('\t')
+    win_prob = float(win_prob)
+    owners = [float(x) for x in owners]
+    assert len(owners == 19 * 19)
+    return win_prob, owners
+def parse(line):
+    line = line[line.index('REPR:')+5:]
+    win_prob, *owners = line.split('\t')
+    win_prob = float(win_prob)
+    owners = [float(x) for x in owners]
+    assert len(owners == 19 * 19)
+    return win_prob, owners
+parse(selected[0])
+def parse(line):
+    line = line[line.index('REPR:')+5:]
+    win_prob, *owners = line.split('\t')
+    win_prob = float(win_prob)
+    print(owners)
+    owners = [float(x) for x in owners]
+    assert len(owners == 19 * 19)
+    return win_prob, owners
+parse(selected[0])
+def parse(line):
+    line = line[line.index('REPR:')+5:]
+    win_prob, *owners = line.split('\t')
+    win_prob = float(win_prob)
+    print(owners)
+    owners = [float(x) for x in owners if x]
+    assert len(owners == 19 * 19)
+    return win_prob, owners
+parse(selected[0])
+def parse(line):
+    line = line[line.index('REPR:')+5:]
+    win_prob, *owners = line.split('\t')
+    win_prob = float(win_prob)
+    print(owners)
+    owners = [float(x) for x in owners if x]
+    assert len(owners) == 19 * 19
+    return win_prob, owners
+parse(selected[0])
+parse(selected[1])
+parse(selected[2])
+all = [parse(l) for l in selected]
+all = [parse(l) for l in selected if "REPR" in l]
+def parse(line):
+    line = line[line.index('REPR:')+5:]
+    win_prob, *owners = line.split('\t')
+    win_prob = float(win_prob)
+    owners = [float(x) for x in owners if x]
+    assert len(owners) == 19 * 19
+    return win_prob, owners
+all = [parse(l) for l in selected if "REPR" in l]
+len(all)
+!pip install scipy
+import numpy as np
+import scipy as sp
+ls
+points = []
+(x, y), z = [[0, 1], 2]
+for _ in range(1000):
+    (l_win, l_own), (r_win, r_won) = random.sample(all, 2)
+from scipy.spatial import distance
+for _ in range(1000):
+    (l_win, l_own), (r_win, r_won) = random.sample(all, 2)
+    dist = distance.cosine(l_own, r_won)
+    print(dist)
+distance.cosine([1, 1], [1, 1])
+(distance.cosine([1, 1], [1, 1]) - 1) * -1
+(distance.cosine([1, 1], [1, 0]) - 1) * -1
+for _ in range(1000):
+    (l_win, l_own), (r_win, r_won) = random.sample(all, 2)
+    dist = 1 - distance.cosine(l_own, r_won)
+    print(dist)
+for _ in range(1000):
+    (l_win, l_own), (r_win, r_won) = random.sample(all, 2)
+    dist = 1 - distance.cosine(l_own, r_won)
+    diff = abs(l_own - r_won)
+    print(dist, diff)
+for _ in range(1000):
+    (l_win, l_own), (r_win, r_won) = random.sample(all, 2)
+    dist = 1 - distance.cosine(l_own, r_won)
+    diff = abs(l_win - r_win)
+    print(dist, diff)
+for _ in range(1000):
+    (l_win, l_own), (r_win, r_won) = random.sample(all, 2)
+    dist = 1 - distance.cosine(l_own, r_won)
+    diff = abs(l_win - r_win)
+    print(dist, diff)
+for _ in range(1000):
+    (l_win, l_own), (r_win, r_won) = random.sample(all, 2)
+    dist = 1 - distance.cosine(l_own, r_won)
+    diff = abs(l_win - r_win)
+xs = [], ys = []
+for _ in range(1000):
+    (l_win, l_own), (r_win, r_won) = random.sample(all, 2)
+    dist = 1 - distance.cosine(l_own, r_won)
+    diff = abs(l_win - r_win)
+    points.append((dist, diff))
+points
+np.corrcoef(points)
+points
+np.corrcoef(np.asarray(points))
+pa = np.asarray(points)
+pa
+pa = np.asarray(points).squeeze()
+pa
+pa.shape
+xs = np.asarry([p[0] for p in points])
+xs = np.asarray([p[0] for p in points])
+ys = np.asarray([p[1] for p in points])
+np.corrcoef(xs, ys)
+%history
+%history -f hist.txt

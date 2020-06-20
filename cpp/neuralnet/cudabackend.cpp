@@ -2332,6 +2332,8 @@ struct Model {
       workspaceBuf,
       workspaceBytes
     );
+
+    // batch_size*19*19*256
     policyHead->apply(
       cudaHandles,
       trunkDescriptor,
@@ -2804,6 +2806,9 @@ struct InputBuffers {
   size_t singleOwnershipResultElts;
   size_t singleOwnershipResultBytes;
 
+  size_t singleMidLayerFeatuesElts;
+  size_t singleMidLayerFeatuesBytes;
+
   size_t userInputBufferBytes;
   size_t userInputGlobalBufferBytes;
   size_t policyResultBufferBytes;
@@ -2819,6 +2824,8 @@ struct InputBuffers {
   float* valueResults; //Host pointer
   float* scoreValueResults; //Host pointer
   float* ownershipResults; //Host pointer
+
+  float* midLayerFeatues;
 
   InputBuffers(const LoadedModel* loadedModel, int maxBatchSz, int nnXLen, int nnYLen) {
     const ModelDesc& m = loadedModel->modelDesc;

@@ -2382,6 +2382,8 @@ struct InputBuffers {
   float* scoreValueResults; //Host pointer
   float* ownershipResults; //Host pointer
 
+
+
   InputBuffers(const LoadedModel* loadedModel, int maxBatchSz, int nnXLen, int nnYLen) {
     const ModelDesc& m = loadedModel->modelDesc;
 
@@ -2480,6 +2482,7 @@ void NeuralNet::getOutput(
   int numBatchEltsFilled,
   vector<NNOutput*>& outputs
 ) {
+
   assert(numBatchEltsFilled <= inputBuffers->maxBatchSize);
   assert(numBatchEltsFilled > 0);
   int batchSize = numBatchEltsFilled;
@@ -2569,7 +2572,23 @@ void NeuralNet::getOutput(
     buffers->convWorkspace2
   );
 
+  int midLayerFeatureSize = gpuHandle->model->trunk->trunkNumChannels * batchSize * nnXLen * nnYLen;
+  float* midLayerFeatureOutput = new float[midLayerFeatureSize * sizeof(float)];
+
   cl_bool blocking = CL_TRUE;
+
+  err = clEnqueueReadBuffer(
+    handle->commandQueue, buffers->trunk, blocking, 0, midLayerFeatureSize, midLayerFeatureOutput, 0, NULL, NULL
+  );
+  CHECK_ERR(err);
+
+/*
+  for(int i=0;i<midLayerFeatureSize;i++){
+    cout << midLayerFeatures[i] << " ";
+  }
+  cout << endl;
+*/
+
   err = clEnqueueReadBuffer(
     handle->commandQueue, buffers->policyPass, blocking, 0, inputBuffers->singlePolicyPassResultBytes*batchSize, inputBuffers->policyPassResults, 0, NULL, NULL
   );
@@ -2646,12 +2665,21 @@ void NeuralNet::getOutput(
 
     //As above, these are NOT actually from white's perspective, but rather the player to move.
     //As usual the client does the postprocessing.
+    output->midLayerFeatures = new float[midLayerFeatureSize];
     if(output->whiteOwnerMap != NULL) {
       assert(gpuHandle->model->numOwnershipChannels == 1);
       std::copy(
         inputBuffers->ownershipResults + row * nnXLen * nnYLen,
         inputBuffers->ownershipResults + (row+1) * nnXLen * nnYLen,
         output->whiteOwnerMap
+      );
+
+
+
+      std::copy(
+        midLayerFeatureOutput + row * nnXLen * nnYLen,
+        midLayerFeatureOutput + (row+1) * nnXLen * nnYLen,
+        output->midLayerFeatures
       );
     }
 

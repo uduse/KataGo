@@ -20,11 +20,11 @@ RUN git clone https://github.com/lightvector/KataGo.git /KataGo_orig
 
 # KataGo with MMCTS implementation
 WORKDIR /KataGo/cpp/
-RUN cmake . -DBUILD_MCTS=1 -DUSE_BACKEND=CUDA && make -j$(nproc)
+RUN cmake . -DBUILD_MCTS=1 -DUSE_BACKEND=OPENCL && make -j$(nproc)
 
 # KataGo without modifications
 WORKDIR /KataGo_orig/cpp/
-RUN cmake . -DBUILD_MCTS=1 -DUSE_BACKEND=CUDA && make -j$(nproc)
+RUN cmake . -DBUILD_MCTS=1 -DUSE_BACKEND=OPENCL && make -j$(nproc)
 RUN cp katago /KataGo/cpp/test_kata
 
 # gogui setup

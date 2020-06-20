@@ -53,6 +53,7 @@ struct NodeStats {
 
   double memoryUtilitySum;
   double memoryUtilitySqSum;
+  double nodeLambda;
 
   NodeStats();
   ~NodeStats();

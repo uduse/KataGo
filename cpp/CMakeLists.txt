@@ -52,12 +52,12 @@ if(USE_BACKEND STREQUAL "CUDA")
     if(CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES)
       list(REMOVE_ITEM CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES "cudart_static")
       list(REMOVE_ITEM CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES "cudadevrt")
-      list(APPEND CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES "cudart")
+      list(APPEND CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES "cudart -Wl,--no-as-needed -ldl")
     endif()
     if(CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES)
       list(REMOVE_ITEM CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES "cudart_static")
       list(REMOVE_ITEM CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES "cudadevrt")
-      list(APPEND CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES "cudart")
+      list(APPEND CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES "cudart -Wl,--no-as-needed -ldl")
     endif()
   endif()
 
@@ -162,14 +162,6 @@ add_executable(katago
   search/asyncbot.cpp
   search/distributiontable.cpp
   search/analysisdata.cpp
-  search/memory/utils.h
-  search/memory/utils.cpp
-  search/memory/memory_entry.h
-  search/memory/memory_entry.cpp
-  search/memory/aggregator.h
-  search/memory/aggregator.cpp
-  search/memory/memory.h
-  search/memory/memory.cpp
 
   search/DyMeNNS/utils.h
   search/DyMeNNS/utils.cpp
@@ -177,7 +169,6 @@ add_executable(katago
   search/DyMeNNS/node.cpp
   search/DyMeNNS/memory.h
   search/DyMeNNS/memory.cpp
-
 
   program/gtpconfig.cpp
   program/setup.cpp
@@ -304,10 +295,10 @@ if(CMAKE_COMPILER_IS_GNUCC)
   endif()
 
   if(USE_TCMALLOC)
-    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -O2 -pedantic -Wall -Wextra -Wno-sign-compare -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Woverloaded-virtual -Wredundant-decls -Wshadow -Wstrict-null-sentinel -Wstrict-overflow=1 -Wswitch-default -Wfloat-conversion -Wnull-dereference -Wunused -Walloc-zero -Wduplicated-branches -Wduplicated-cond -Wdangling-else -Wrestrict -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free")
+    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -O2 -Wl,--no-as-needed -ldl -pedantic -Wall -Wextra -Wno-sign-compare -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Woverloaded-virtual -Wredundant-decls -Wshadow -Wstrict-null-sentinel -Wstrict-overflow=1 -Wswitch-default -Wfloat-conversion -Wnull-dereference -Wunused -Walloc-zero -Wduplicated-branches -Wduplicated-cond -Wdangling-else -Wrestrict -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free")
   else()
-    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -O2 -pedantic -Wall -Wextra -Wno-sign-compare -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Woverloaded-virtual -Wredundant-decls -Wshadow -Wstrict-null-sentinel -Wstrict-overflow=1 -Wswitch-default -Wfloat-conversion -Wnull-dereference -Wunused -Walloc-zero -Wduplicated-branches -Wduplicated-cond -Wdangling-else -Wrestrict")
+    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -O2 -Wl,--no-as-needed -ldl -pedantic -Wall -Wextra -Wno-sign-compare -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Woverloaded-virtual -Wredundant-decls -Wshadow -Wstrict-null-sentinel -Wstrict-overflow=1 -Wswitch-default -Wfloat-conversion -Wnull-dereference -Wunused -Walloc-zero -Wduplicated-branches -Wduplicated-cond -Wdangling-else -Wrestrict")
   endif()
 endif()
 

@@ -6,6 +6,7 @@
 
 #include <boost/algorithm/string/join.hpp>
 #include <chrono>
+#include <cmath>
 
 void utils::timeIt(const std::function<void()> &func, const std::string &desc) {
   std::chrono::high_resolution_clock::time_point t_start, t_end;
@@ -77,7 +78,7 @@ double utils::cosineSimilarity(FeatureVector lhs, FeatureVector rhs) {
     lhs_denom += lhs[i] * lhs[i];
     rhs_denom += rhs[i] * rhs[i];
   }
-  return numerator / (lhs_denom * rhs_denom);
+  return numerator / std::sqrt(lhs_denom * rhs_denom);
 }
 
 

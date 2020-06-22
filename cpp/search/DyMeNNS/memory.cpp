@@ -28,9 +28,28 @@ void Memory::setAggregator(const char* aggregator_){
 	return;
 }
 
+void Memory::printMemory(){
+	cout << "Memory Size: " << this->memorySize << endl;
+	if(this->aggregator == weighted_average){
+		cout << "Aggregator: weighted_average" << endl;
+	}
+	else{
+		cout << "Aggregator: weighted_softmax" << endl;	
+		cout << "tau: " << tau << endl;
+	}
+	cout << "numNeighbors: " << numNeighbors << endl;
+
+	for(int i=0;i<memArray.size();i++){
+		cout << "Entry: " << (i+1) << endl;
+		memArray[i].printStats();
+	}
+}
+
+
+
 void Memory::update(Hash128 hash, float* featureVector, MemoryNodeStats stats){
 	Node newNode(hash, featureVector, this->featureDimension, stats);
-	
+	// cout << stats.utility << endl;
 	if(memArray.size() < this->memorySize){
 		for(int i=0;i<memArray.size();i++){
 			if(memArray[i].hash == hash){
@@ -68,6 +87,26 @@ MemoryNodeStats Memory::query(float* featureVector){
 		}
 	}
 
+	
+/*	
+	cout << "-------------------------------------------------------------------------------------" << endl; 
+	priority_queue<pair<double, int> > temp = top_neighbours;
+	while (!temp.empty()) {
+        cout << temp.top().first << " ";
+        temp.pop();
+    }
+    cout << endl;
+    temp = top_neighbours;
+	while (!temp.empty()) {
+        cout << memArray[temp.top().second].stats.utility << " ";
+        // cout << temp.top().second << " ";
+        temp.pop();
+    }
+    cout << endl;
+    
+    cout << "-------------------------------------------------------------------------------------" << endl;
+*/
+
 	int index;
 	MemoryNodeStats stats = MemoryNodeStats();
 	double weight = 0;
@@ -78,7 +117,7 @@ MemoryNodeStats Memory::query(float* featureVector){
 		top_neighbours.pop();
 
 		if(this->aggregator == weighted_average){
-			weight = result.first;
+			weight = -result.first;
 			weightSum += weight;
 		}
 

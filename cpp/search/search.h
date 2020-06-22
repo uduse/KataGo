@@ -185,9 +185,10 @@ struct Search {
   // MMCTS Related
   std::unique_ptr<Memory> memoryPtr;
   uint64_t memorySize;
-  double memoryLambda;
   uint64_t memoryNumNeighbors;
+  double memoryLambda;
   uint64_t memoryUpdateSchema;
+  double gamma;
 
   //Note - randSeed controls a few things in the search, but a lot of the randomness actually comes from
   //random symmetries of the neural net evaluations, see nneval.h
@@ -398,7 +399,7 @@ private:
     bool isRoot
   ) const;
 
-  void addLeafValue(SearchNode &node, SearchThread &thread, double winValue, double noResultValue, double scoreMean, double scoreMeanSq, double lead, int32_t virtualLossesToSubtract, bool useMemory);
+  void addLeafValue(SearchNode &node, double winValue, double noResultValue, double scoreMean, double scoreMeanSq, double lead, int32_t virtualLossesToSubtract, bool useMemory);
 
   void maybeRecomputeExistingNNOutput(
     SearchThread& thread, SearchNode& node, bool isRoot

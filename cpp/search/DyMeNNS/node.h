@@ -26,5 +26,6 @@ public:
 	float* feature;
 	int featureSize;
 	MemoryNodeStats stats;
-	Node(Hash128 hash, float* features, int featureSize, MemoryNodeStats stats);
+	void printStats();
+	Node(Hash128 hash, float* features, int featureSize, MemoryNodeStats stats_);
 };

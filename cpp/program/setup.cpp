@@ -323,6 +323,10 @@ vector<SearchParams> Setup::loadParams(
       params.tau = cfg.getDouble("tau", (double) 0.001, (double) 1);
     }
 
+    if (cfg.contains("gamma")) {
+      params.gamma = cfg.getDouble("gamma", (double) 0.7, (double) 1);
+    }
+
     if (cfg.contains("memoryNumNeighbors")) {
       params.memoryNumNeighbors = cfg.getUInt64(
           "memoryNumNeighbors", (uint64_t) 2, (uint64_t) 128);
@@ -331,6 +335,11 @@ vector<SearchParams> Setup::loadParams(
     if (cfg.contains("memoryUpdateSchema")) {
       params.memoryUpdateSchema = cfg.getUInt64(
           "memoryUpdateSchema", (uint64_t) 0, (uint64_t) 10);
+    }
+
+    if (cfg.contains("aggregator")) {
+      params.aggregator = cfg.getUInt64(
+          "aggregator", (uint64_t) 0, (uint64_t) 1);
     }
 
     if(cfg.contains("maxPlayoutsPondering"+idxStr)) params.maxPlayoutsPondering = cfg.getInt64("maxPlayoutsPondering"+idxStr, (int64_t)1, (int64_t)1 << 50);

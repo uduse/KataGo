@@ -9,7 +9,7 @@ double cosine_similarity(float* A, float* B, int size){
         a_denom += A[i] * A[i] ;
         b_denom += B[i] * B[i] ;
 	}
-	return numerator/(a_denom*b_denom);
+	return numerator/sqrt(a_denom*b_denom);
 }
 
 double mergeMemoryValue(const double actualValue, const double memoryValue, const double lambda) {

@@ -32,5 +32,7 @@ public:
 	void setTau(double tau_);
 
 	void setAggregator(const char* aggregator);
+
+	void printMemory();
  
 };

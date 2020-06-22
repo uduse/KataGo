@@ -62,7 +62,9 @@ SearchParams::SearchParams()
    memoryNumNeighbors(8),
    memoryLambda(0.05),
    memoryUpdateSchema(0),
-   tau(0.02)
+   tau(0.02),
+   aggregator(1),
+   gamma(0.9)
 {}
 
 SearchParams::~SearchParams()

@@ -2572,13 +2572,15 @@ void NeuralNet::getOutput(
     buffers->convWorkspace2
   );
 
-  int midLayerFeatureSize = gpuHandle->model->trunk->trunkNumChannels * batchSize * nnXLen * nnYLen;
-  float* midLayerFeatureOutput = new float[midLayerFeatureSize * sizeof(float)];
+
+  // cout << gpuHandle->model->trunk->trunkNumChannels << endl;
+  int midLayerFeatureSize = gpuHandle->model->trunk->trunkNumChannels * nnXLen * nnYLen;
+  float* midLayerFeatureOutput = new float[midLayerFeatureSize * batchSize];
 
   cl_bool blocking = CL_TRUE;
 
   err = clEnqueueReadBuffer(
-    handle->commandQueue, buffers->trunk, blocking, 0, midLayerFeatureSize, midLayerFeatureOutput, 0, NULL, NULL
+    handle->commandQueue, buffers->trunk, blocking, 0, midLayerFeatureSize*batchSize*sizeof(float), midLayerFeatureOutput, 0, NULL, NULL
   );
   CHECK_ERR(err);
 
@@ -2675,10 +2677,10 @@ void NeuralNet::getOutput(
       );
 
 
-
+      // cout << midLayerFeatureSize << endl;
       std::copy(
-        midLayerFeatureOutput + row * nnXLen * nnYLen,
-        midLayerFeatureOutput + (row+1) * nnXLen * nnYLen,
+        midLayerFeatureOutput + row * midLayerFeatureSize,
+        midLayerFeatureOutput + (row+1) * midLayerFeatureSize,
         output->midLayerFeatures
       );
     }

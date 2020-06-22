@@ -89,6 +89,8 @@ struct SearchParams {
   double memoryLambda;
   uint64_t memoryUpdateSchema;
   double tau;
+  uint64_t aggregator;
+  double gamma;
 
   SearchParams();
   ~SearchParams();

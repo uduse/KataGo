@@ -1,4 +1,20 @@
 FROM nvidia/cuda:10.2-cudnn7-devel
+
+# Dockerfile mixing OpenGL and OpenCL
+ENV NVIDIA_DRIVER_CAPABILITIES ${NVIDIA_DRIVER_CAPABILITIES},display
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        mesa-utils \
+        ocl-icd-libopencl1 \
+        clinfo && \
+    rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /etc/OpenCL/vendors && \
+    echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES compute,utility,display
+
+
+
+
 RUN apt-get update \
     && apt-get -y install vim git gcc wget unzip npm zlib1g-dev libzip-dev \
     libboost-filesystem-dev ocl-icd-opencl-dev build-essential default-jre gconf2

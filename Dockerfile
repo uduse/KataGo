@@ -22,12 +22,12 @@ RUN cp -r /KataGo /KataGo_orig
 
 # KataGo with MMCTS implementation
 WORKDIR /KataGo/cpp/
-RUN cmake . -DBUILD_MCTS=1 -DUSE_BACKEND=CUDA -DCMAKE_BUILD_TYPE=Debug && make -j$(nproc)
+RUN cmake . -DBUILD_MCTS=1 -DUSE_BACKEND=OPENCL -DCMAKE_BUILD_TYPE=Debug && make -j$(nproc)
 
 # KataGo without modifications
 WORKDIR /KataGo_orig/cpp/
 RUN git fetch && git checkout master
-RUN cmake . -DBUILD_MCTS=1 -DUSE_BACKEND=CUDA && make -j$(nproc)
+RUN cmake . -DBUILD_MCTS=1 -DUSE_BACKEND=OPENCL && make -j$(nproc)
 
 # gogui setup
 WORKDIR /gogui/

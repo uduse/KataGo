@@ -6,7 +6,7 @@
 #include "../neuralnet/modelversion.h"
 #include "../neuralnet/openclkernels.h"
 #include "../neuralnet/opencltuner.h"
-
+#include "../search/FeatureHashing/FeatureHashing.h"
 #include "../neuralnet/openclhelpers.h"
 
 using namespace std;
@@ -2574,15 +2574,15 @@ void NeuralNet::getOutput(
 
 
   // cout << gpuHandle->model->trunk->trunkNumChannels << endl;
-  int midLayerFeatureSize = gpuHandle->model->trunk->trunkNumChannels * nnXLen * nnYLen;
-  float* midLayerFeatureOutput = new float[midLayerFeatureSize * batchSize];
+  // int midLayerFeatureSize = gpuHandle->model->trunk->trunkNumChannels * nnXLen * nnYLen;
+  // float* midLayerFeatureOutput = new float[midLayerFeatureSize * batchSize];
 
   cl_bool blocking = CL_TRUE;
 
-  err = clEnqueueReadBuffer(
-    handle->commandQueue, buffers->trunk, blocking, 0, midLayerFeatureSize*batchSize*sizeof(float), midLayerFeatureOutput, 0, NULL, NULL
-  );
-  CHECK_ERR(err);
+  // err = clEnqueueReadBuffer(
+    // handle->commandQueue, buffers->trunk, blocking, 0, midLayerFeatureSize*batchSize*sizeof(float), midLayerFeatureOutput, 0, NULL, NULL
+  // );
+  // CHECK_ERR(err);
 
 /*
   for(int i=0;i<midLayerFeatureSize;i++){
@@ -2667,7 +2667,9 @@ void NeuralNet::getOutput(
 
     //As above, these are NOT actually from white's perspective, but rather the player to move.
     //As usual the client does the postprocessing.
-    output->midLayerFeatures = new float[midLayerFeatureSize];
+
+    // output->midLayerFeatures = new float[midLayerFeatureSize];
+
     if(output->whiteOwnerMap != NULL) {
       assert(gpuHandle->model->numOwnershipChannels == 1);
       std::copy(
@@ -2675,14 +2677,12 @@ void NeuralNet::getOutput(
         inputBuffers->ownershipResults + (row+1) * nnXLen * nnYLen,
         output->whiteOwnerMap
       );
-
-
-      // cout << midLayerFeatureSize << endl;
-      std::copy(
-        midLayerFeatureOutput + row * midLayerFeatureSize,
-        midLayerFeatureOutput + (row+1) * midLayerFeatureSize,
-        output->midLayerFeatures
-      );
+      
+      // std::copy(
+        // midLayerFeatureOutput + row * midLayerFeatureSize,
+        // midLayerFeatureOutput + (row+1) * midLayerFeatureSize,
+        // output->midLayerFeatures
+      // );
     }
 
     if(version >= 8) {

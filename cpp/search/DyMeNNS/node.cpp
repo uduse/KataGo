@@ -19,8 +19,6 @@ Node::Node(Hash128 hash, float* features, int featureSize, MemoryNodeStats stats
 	this->stats.scoreMeanSq = stats_.scoreMeanSq;
 	this->stats.lead = stats_.lead;
 	this->stats.utility = stats_.utility;
-	this->stats.utilitySum = stats_.utilitySum;
-	this->stats.utilitySqSum = stats_.utilitySqSum;
 	this->stats.visits = stats_.visits;
 }
 
@@ -30,8 +28,6 @@ void Node::printStats(){
 	cout << "scoreMean: " << this->stats.scoreMean << endl;
 	cout << "scoreMeanSq: " << this->stats.scoreMeanSq << endl;
 	cout << "lead: " << this->stats.lead << endl;
-	cout << "utility: " << this->stats.utility << endl; 
-	cout << "utilitySum: " << this->stats.utilitySum << endl;
-	cout << "utilitySqSum: " << this->stats.utilitySqSum << endl;
+	cout << "utility: " << this->stats.utility << endl;
 	cout << "visits: " << this->stats.visits << endl;
 }

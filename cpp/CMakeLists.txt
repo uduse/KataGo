@@ -169,6 +169,7 @@ add_executable(katago
   search/DyMeNNS/node.cpp
   search/DyMeNNS/memory.h
   search/DyMeNNS/memory.cpp
+  search/FeatureHashing/FeatureHashing.h
 
   program/gtpconfig.cpp
   program/setup.cpp

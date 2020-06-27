@@ -20,5 +20,5 @@ jobs:
         registry: docker.pkg.github.com
         password: ${{ secrets.GITHUB_TOKEN }}
         repository: ${{ github.repository }}/docker
+        cache_froms: ${{ github.repository }}/docker:latest
         tag_with_ref: true
-        cache_from: ${{ github.repository }}/docker:latest

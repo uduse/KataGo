@@ -21,4 +21,4 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
         repository: ${{ github.repository }}/docker
         tag_with_ref: true
-        cache_from: ${{ github.repository }}/docker
+        cache_from: ${{ github.repository }}/docker:latest

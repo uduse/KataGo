@@ -18,12 +18,12 @@ void Memory::setAggregator(const char* aggregator_){
 	char* weighted_softmax_string = "weighted_softmax";
 	if(strcmp(weighted_average_string, aggregator_) == 0){
 		this->aggregator = weighted_average;
-		cout << "Aggregator set to weighted_average" << endl;
+		// cout << "Aggregator set to weighted_average" << endl;
 	}
 	
 	if(strcmp(weighted_softmax_string, aggregator_) == 0){
 		this->aggregator = weighted_softmax;
-		cout << "Aggregator set to weighted_softmax" << endl;
+		// cout << "Aggregator set to weighted_softmax" << endl;
 	}
 	return;
 }
@@ -141,6 +141,7 @@ MemoryNodeStats Memory::query(float* featureVector){
 		}
 
 		if(this->aggregator == weighted_softmax){
+			// cout << memArray[index].stats.visits << endl;
 			weight = memArray[index].stats.visits * exp(-(1 + result.first)/this->tau);
 			weightSum += weight;
 		}

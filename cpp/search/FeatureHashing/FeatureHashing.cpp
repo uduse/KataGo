@@ -1,4 +1,5 @@
 #include "FeatureHashing.h"
+#include <string.h>
 
 int h(int x){
 	return x;
@@ -12,6 +13,7 @@ int E(int x){
 }
 
 void FeatureHashing(float* bigArray, float* smallArray, int bigDimension, int smallDimension){
+	memset(smallArray, 0, smallDimension);
 	for(int i=0;i<bigDimension;i++){
 		smallArray[h(i) % smallDimension] += E(i) * bigArray[i];
 	}

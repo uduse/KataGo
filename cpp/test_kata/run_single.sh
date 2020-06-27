@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-: ${NUM_GAMES:=100}
+: ${NUM_GAMES:=16}
 : ${NUM_THREADS:=1}
 
 NOW=$(date +"%T")

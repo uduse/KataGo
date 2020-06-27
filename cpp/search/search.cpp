@@ -201,7 +201,7 @@ Search::Search(SearchParams params, NNEvaluator* nnEval, const string& rSeed)
     memoryPtr->setAggregator("weighted_average");
   }
 
-  std::cout << "memorySize: " << memorySize << " memoryNumNeighbors: " << memoryNumNeighbors << " memoryLambda: " << memoryLambda << " memoryUpdateSchema: " << memoryUpdateSchema << " tau: " << params.tau << " gamma: " << gamma << std::endl;
+  // std::cout << "memorySize: " << memorySize << " memoryNumNeighbors: " << memoryNumNeighbors << " memoryLambda: " << memoryLambda << " memoryUpdateSchema: " << memoryUpdateSchema << " tau: " << params.tau << " gamma: " << gamma << std::endl;
 
   setAlwaysIncludeOwnerMap(true);
 }
@@ -1732,7 +1732,7 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
           utility = mergeMemoryValue(utility, query.utility, weightedLambda);
         }
         // memoryPtr->update(hash, midLayerFeatures, stats);
-        memoryPtr->update(hash, whiteOwnerMapFeature, stats);
+        // memoryPtr->update(hash, whiteOwnerMapFeature, stats);
       }
     }
 
@@ -1892,6 +1892,7 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
         auto query = memoryPtr->query(whiteOwnerMapFeature);
         // cout << "origUtility: " << utility << endl;
         // cout << "queryUtility: " << query.utility << endl;
+        // cout << "numVisits: " << query.visits << endl;
         utility = mergeMemoryValue(utility, query.utility, nodeLambda);
       }
       memoryPtr->update(hash, whiteOwnerMapFeature, stats);

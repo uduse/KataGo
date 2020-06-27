@@ -1732,7 +1732,7 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
           utility = mergeMemoryValue(utility, query.utility, weightedLambda);
         }
         // memoryPtr->update(hash, midLayerFeatures, stats);
-        // memoryPtr->update(hash, whiteOwnerMapFeature, stats);
+        memoryPtr->update(hash, whiteOwnerMapFeature, stats);
       }
     }
 

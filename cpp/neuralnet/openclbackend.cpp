@@ -2574,15 +2574,15 @@ void NeuralNet::getOutput(
 
 
   // cout << gpuHandle->model->trunk->trunkNumChannels << endl;
-  // int midLayerFeatureSize = gpuHandle->model->trunk->trunkNumChannels * nnXLen * nnYLen;
-  // float* midLayerFeatureOutput = new float[midLayerFeatureSize * batchSize];
+  int midLayerFeatureSize = gpuHandle->model->trunk->trunkNumChannels * nnXLen * nnYLen;
+  float* midLayerFeatureOutput = new float[midLayerFeatureSize * batchSize];
 
   cl_bool blocking = CL_TRUE;
 
-  // err = clEnqueueReadBuffer(
-    // handle->commandQueue, buffers->trunk, blocking, 0, midLayerFeatureSize*batchSize*sizeof(float), midLayerFeatureOutput, 0, NULL, NULL
-  // );
-  // CHECK_ERR(err);
+  err = clEnqueueReadBuffer(
+    handle->commandQueue, buffers->trunk, blocking, 0, midLayerFeatureSize*batchSize*sizeof(float), midLayerFeatureOutput, 0, NULL, NULL
+  );
+  CHECK_ERR(err);
 
 /*
   for(int i=0;i<midLayerFeatureSize;i++){
@@ -2668,7 +2668,7 @@ void NeuralNet::getOutput(
     //As above, these are NOT actually from white's perspective, but rather the player to move.
     //As usual the client does the postprocessing.
 
-    // output->midLayerFeatures = new float[midLayerFeatureSize];
+    output->midLayerFeatures = new float[4000];
 
     if(output->whiteOwnerMap != NULL) {
       assert(gpuHandle->model->numOwnershipChannels == 1);
@@ -2677,6 +2677,16 @@ void NeuralNet::getOutput(
         inputBuffers->ownershipResults + (row+1) * nnXLen * nnYLen,
         output->whiteOwnerMap
       );
+
+      FeatureHashing(midLayerFeatureOutput + (row * midLayerFeatureSize), output->midLayerFeatures, midLayerFeatureSize, 4000);
+
+     // output->midLayerFeatures
+
+      // for(int i=0;i<4000;i++){
+      	// cout << output->midLayerFeatures[i] << " ";
+      	// cout << i << endl;
+      // }
+      // cout << endl;
       
       // std::copy(
         // midLayerFeatureOutput + row * midLayerFeatureSize,

@@ -183,9 +183,9 @@ Search::Search(SearchParams params, NNEvaluator* nnEval, const string& rSeed)
 
   // const uint64_t featureDim = nnXLen * nnYLen * 192;
 
-  // const int featureDim = 4000;
+  const int featureDim = 4000;
 
-  const uint64_t featureDim = nnXLen * nnYLen;
+  // const uint64_t featureDim = nnXLen * nnYLen;
 
   memoryPtr = std::make_unique<Memory>(
       featureDim,
@@ -1689,10 +1689,10 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
 
     if (memoryUpdateSchema == 3 && node.nnOutput != nullptr) {
       Hash128 &hash = node.nnOutput->nnHash;
-      float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
-      // float* midLayerFeatures = node.nnOutput->midLayerFeatures;
-      if (whiteOwnerMapFeature) {
-      // if (midLayerFeatures) {
+      // float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
+      float* midLayerFeatures = node.nnOutput->midLayerFeatures;
+      // if (whiteOwnerMapFeature) {
+      if (midLayerFeatures) {
         MemoryNodeStats stats = MemoryNodeStats();
         stats.winProb = winProb;
         stats.noResultProb = noResultProb;
@@ -1701,15 +1701,15 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
         stats.lead = lead;
         stats.visits = numVisitsToAdd;
         if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
-          auto query = memoryPtr->query(whiteOwnerMapFeature);
+          auto query = memoryPtr->query(midLayerFeatures);
           lead = mergeMemoryValue(lead, query.lead, weightedLambda);
           scoreMean = mergeMemoryValue(scoreMean, query.scoreMean, weightedLambda);
           noResultProb = mergeMemoryValue(noResultProb, query.noResultProb, weightedLambda);
           winProb = mergeMemoryValue(winProb, query.winProb, weightedLambda);
           scoreMeanSq = mergeMemoryValue(scoreMeanSq, query.scoreMeanSq, weightedLambda);
         }
-        memoryPtr->update(hash, whiteOwnerMapFeature, stats);
-        // memoryPtr->update(hash, midLayerFeatures, stats);
+        // memoryPtr->update(hash, whiteOwnerMapFeature, stats);
+        memoryPtr->update(hash, midLayerFeatures, stats);
       }
     }
 
@@ -1720,30 +1720,30 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
     
     if (memoryUpdateSchema == 0 && node.nnOutput != nullptr) {
       Hash128 &hash = node.nnOutput->nnHash;
-      // float* midLayerFeatures = node.nnOutput->midLayerFeatures;
-      // if (midLayerFeatures) {
-      float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
-      if (whiteOwnerMapFeature) {
+      float* midLayerFeatures = node.nnOutput->midLayerFeatures;
+      if (midLayerFeatures) {
+      // float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
+      // if (whiteOwnerMapFeature) {
         MemoryNodeStats stats = MemoryNodeStats();
         stats.utility = utility;
         stats.visits = numVisitsToAdd;
         if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
-          auto query = memoryPtr->query(whiteOwnerMapFeature);
+          auto query = memoryPtr->query(midLayerFeatures);
           utility = mergeMemoryValue(utility, query.utility, weightedLambda);
         }
-        // memoryPtr->update(hash, midLayerFeatures, stats);
-        memoryPtr->update(hash, whiteOwnerMapFeature, stats);
+        memoryPtr->update(hash, midLayerFeatures, stats);
+        // memoryPtr->update(hash, whiteOwnerMapFeature, stats);
       }
     }
 
     if (memoryUpdateSchema == 1 && node.nnOutput != nullptr) {
       Hash128 &hash = node.nnOutput->nnHash;
-      float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
-      if (whiteOwnerMapFeature) {
-      // float* midLayerFeatures = node.nnOutput->midLayerFeatures;
-      // if (midLayerFeatures) {
+      // float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
+      // if (whiteOwnerMapFeature) {
+      float* midLayerFeatures = node.nnOutput->midLayerFeatures;
+      if (midLayerFeatures) {
         if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
-          auto queryResult = memoryPtr->query(whiteOwnerMapFeature);
+          auto queryResult = memoryPtr->query(midLayerFeatures);
           double memUtility = queryResult.utility;
           memUtilitySum += memUtility * desiredWeight;
           memUtilitySqSum += memUtility * memUtility * desiredWeight;
@@ -1752,27 +1752,27 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
         MemoryNodeStats stats = MemoryNodeStats();
         stats.utility = utility;
         stats.visits = numVisitsToAdd;
-        // memoryPtr->update(hash, midLayerFeatures, stats);
-        memoryPtr->update(hash, whiteOwnerMapFeature, stats);
+        memoryPtr->update(hash, midLayerFeatures, stats);
+        // memoryPtr->update(hash, whiteOwnerMapFeature, stats);
       } 
     }
 
     if (memoryUpdateSchema == 2 && node.nnOutput != nullptr) {
       Hash128 &hash = node.nnOutput->nnHash;
-      float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
-      if (whiteOwnerMapFeature) {
+      // float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
+      // if (whiteOwnerMapFeature) {
       
-      // float* midLayerFeatures = node.nnOutput->midLayerFeatures;
-      // if (midLayerFeatures) {
+      float* midLayerFeatures = node.nnOutput->midLayerFeatures;
+      if (midLayerFeatures) {
         if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
-          auto queryResult = memoryPtr->query(whiteOwnerMapFeature);
+          auto queryResult = memoryPtr->query(midLayerFeatures);
           memUtilitySum += queryResult.utility * desiredWeight;
         }
         MemoryNodeStats stats = MemoryNodeStats();
         stats.utility = utility;
         stats.visits = numVisitsToAdd;
-        memoryPtr->update(hash, whiteOwnerMapFeature, stats);
-        // memoryPtr->update(hash, midLayerFeatures, stats);
+        // memoryPtr->update(hash, whiteOwnerMapFeature, stats);
+        memoryPtr->update(hash, midLayerFeatures, stats);
       }
     }
 
@@ -1849,10 +1849,10 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
   double nodeLambda = node.stats.nodeLambda;
   if (memoryUpdateSchema == 3 && node.nnOutput != nullptr) {
     Hash128 &hash = node.nnOutput->nnHash;
-    float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
-    if (whiteOwnerMapFeature) {
-    // float* midLayerFeatures = node.nnOutput->midLayerFeatures;
-    // if (midLayerFeatures) {
+    // float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
+    // if (whiteOwnerMapFeature) {
+    float* midLayerFeatures = node.nnOutput->midLayerFeatures;
+    if (midLayerFeatures) {
       MemoryNodeStats stats = MemoryNodeStats();
       stats.winProb = winValue;
       stats.noResultProb = noResultValue;
@@ -1861,14 +1861,14 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
       stats.lead = lead;
       stats.visits = 1;
       if (useMemory && (memoryPtr->memArray.size() >= memoryPtr->numNeighbors)) {
-        auto query = memoryPtr->query(whiteOwnerMapFeature);
+        auto query = memoryPtr->query(midLayerFeatures);
         lead = mergeMemoryValue(lead, query.lead, nodeLambda);
         scoreMean = mergeMemoryValue(scoreMean, query.scoreMean, nodeLambda);
         noResultValue = mergeMemoryValue(noResultValue, query.noResultProb, nodeLambda);
         winValue = mergeMemoryValue(winValue, query.winProb, nodeLambda);
         scoreMeanSq = mergeMemoryValue(scoreMeanSq, query.scoreMeanSq, nodeLambda);
       }
-      memoryPtr->update(hash, whiteOwnerMapFeature, stats);
+      memoryPtr->update(hash, midLayerFeatures, stats);
     }
   }
 
@@ -1880,23 +1880,23 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
 
   if (memoryUpdateSchema == 0 && node.nnOutput != nullptr) {
     Hash128 &hash = node.nnOutput->nnHash;
-    float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
-    if (whiteOwnerMapFeature) {
+    // float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
+    // if (whiteOwnerMapFeature) {
     
-    // float* midLayerFeatures = node.nnOutput->midLayerFeatures;
-    // if (midLayerFeatures) {
+    float* midLayerFeatures = node.nnOutput->midLayerFeatures;
+    if (midLayerFeatures) {
       MemoryNodeStats stats = MemoryNodeStats();
       stats.utility = utility;
       stats.visits = 1;
       if (useMemory && (memoryPtr->memArray.size() >= memoryPtr->numNeighbors)) {
-        auto query = memoryPtr->query(whiteOwnerMapFeature);
+        auto query = memoryPtr->query(midLayerFeatures);
         // cout << "origUtility: " << utility << endl;
         // cout << "queryUtility: " << query.utility << endl;
         // cout << "numVisits: " << query.visits << endl;
         utility = mergeMemoryValue(utility, query.utility, nodeLambda);
       }
-      memoryPtr->update(hash, whiteOwnerMapFeature, stats);
-      // memoryPtr->update(hash, midLayerFeatures, stats);
+      // memoryPtr->update(hash, whiteOwnerMapFeature, stats);
+      memoryPtr->update(hash, midLayerFeatures, stats);
     }
   }
 
@@ -1904,13 +1904,13 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
 
   if (memoryUpdateSchema == 1 && node.nnOutput != nullptr) {
     Hash128 &hash = node.nnOutput->nnHash;
-    float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
-    if (whiteOwnerMapFeature) {
-    // float* midLayerFeatures = node.nnOutput->midLayerFeatures;
-    // if (midLayerFeatures) {
+    // float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
+    // if (whiteOwnerMapFeature) {
+    float* midLayerFeatures = node.nnOutput->midLayerFeatures;
+    if (midLayerFeatures) {
       // We need to use this memory even in terminal state that is why we removed useMemory
       if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
-        auto queryResult = memoryPtr->query(whiteOwnerMapFeature);
+        auto queryResult = memoryPtr->query(midLayerFeatures);
         double memUtility = queryResult.utility;
         node.stats.memoryUtilitySum += memUtility;
         node.stats.memoryUtilitySqSum += memUtility * memUtility;
@@ -1918,27 +1918,27 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
       MemoryNodeStats stats = MemoryNodeStats();
       stats.utility = utility;
       stats.visits = 1;
-      memoryPtr->update(hash, whiteOwnerMapFeature, stats);
-      // memoryPtr->update(hash, midLayerFeatures, stats);
+      // memoryPtr->update(hash, whiteOwnerMapFeature, stats);
+      memoryPtr->update(hash, midLayerFeatures, stats);
     }
   }
 
   if (memoryUpdateSchema == 2 && node.nnOutput != nullptr) {
     Hash128 &hash = node.nnOutput->nnHash;
-    // float* midLayerFeatures = node.nnOutput->midLayerFeatures;
-    // if (midLayerFeatures) {
-    float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
-    if (whiteOwnerMapFeature) {
+    float* midLayerFeatures = node.nnOutput->midLayerFeatures;
+    if (midLayerFeatures) {
+    // float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
+    // if (whiteOwnerMapFeature) {
       // We need to use this memory even in terminal state that is why we removed useMemory
       if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
-        auto queryResult = memoryPtr->query(whiteOwnerMapFeature);
+        auto queryResult = memoryPtr->query(midLayerFeatures);
         node.stats.memoryUtilitySum += queryResult.utility;
       }
       MemoryNodeStats stats = MemoryNodeStats();
       stats.utility = utility;
       stats.visits = 1;
-      // memoryPtr->update(hash, midLayerFeatures, stats);
-      memoryPtr->update(hash, whiteOwnerMapFeature, stats);
+      memoryPtr->update(hash, midLayerFeatures, stats);
+      // memoryPtr->update(hash, whiteOwnerMapFeature, stats);
     }
   }
 

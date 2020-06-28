@@ -29,14 +29,8 @@ WORKDIR /KataGo_orig/cpp/
 RUN git fetch && git checkout master
 RUN cmake . -DBUILD_MCTS=1 -DUSE_BACKEND=OPENCL && make -j$(nproc)
 
-# gogui setup
-WORKDIR /gogui/
-RUN sed 's/sudo apt install/apt-get install -y/g' ubuntu_setup.sh > temp.sh \
-    && sh temp.sh \
-    && ./install.sh
-
 # gomill setup
 WORKDIR /tournaments
-RUN pip install gomill
+RUN git clone https://github.com/uduse/gomill/ && pip install -e gomill/gomill_setup
 
 WORKDIR /tournaments

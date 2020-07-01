@@ -2678,7 +2678,7 @@ void NeuralNet::getOutput(
         output->whiteOwnerMap
       );
 
-      FeatureHashing(midLayerFeatureOutput + (row * midLayerFeatureSize), output->midLayerFeatures, midLayerFeatureSize, 4000);
+      FeatureHashing(midLayerFeatureOutput + (row * midLayerFeatureSize), output->midLayerFeatures, midLayerFeatureSize, 324);
 
      // output->midLayerFeatures
 

@@ -298,7 +298,7 @@ void NNInputs::fillScoring(
 
 
 NNOutput::NNOutput()
-  :whiteOwnerMap(NULL),noisedPolicyProbs(NULL)
+  :whiteOwnerMap(NULL),noisedPolicyProbs(NULL),midLayerFeatures(NULL)
 {}
 NNOutput::NNOutput(const NNOutput& other) {
   nnHash = other.nnHash;
@@ -312,19 +312,32 @@ NNOutput::NNOutput(const NNOutput& other) {
 
   nnXLen = other.nnXLen;
   nnYLen = other.nnYLen;
+  
   if(other.whiteOwnerMap != NULL) {
     whiteOwnerMap = new float[nnXLen * nnYLen];
     std::copy(other.whiteOwnerMap, other.whiteOwnerMap + nnXLen * nnYLen, whiteOwnerMap);
   }
-  else
+  else{
     whiteOwnerMap = NULL;
+  }
+
+
+  if(other.midLayerFeatures != NULL) {
+    midLayerFeatures = new float[324];
+    std::copy(other.midLayerFeatures, other.midLayerFeatures + 324, midLayerFeatures);
+  }
+  else{
+    midLayerFeatures = NULL;
+  }
+
 
   if(other.noisedPolicyProbs != NULL) {
     noisedPolicyProbs = new float[NNPos::MAX_NN_POLICY_SIZE];
     std::copy(other.noisedPolicyProbs, other.noisedPolicyProbs + NNPos::MAX_NN_POLICY_SIZE, noisedPolicyProbs);
   }
-  else
+  else{
     noisedPolicyProbs = NULL;
+  }
 
   std::copy(other.policyProbs, other.policyProbs+NNPos::MAX_NN_POLICY_SIZE, policyProbs);
 }
@@ -369,6 +382,8 @@ NNOutput::NNOutput(const vector<shared_ptr<NNOutput>>& others) {
   {
     float whiteOwnerMapCount = 0.0f;
     whiteOwnerMap = NULL;
+    midLayerFeatures = NULL;
+    
     for(int i = 0; i<len; i++) {
       const NNOutput& other = *(others[i]);
       if(other.whiteOwnerMap != NULL) {
@@ -377,14 +392,27 @@ NNOutput::NNOutput(const vector<shared_ptr<NNOutput>>& others) {
           std::fill(whiteOwnerMap, whiteOwnerMap + nnXLen * nnYLen, 0.0f);
         }
         whiteOwnerMapCount += 1.0f;
-        for(int pos = 0; pos<nnXLen*nnYLen; pos++)
+        for(int pos = 0; pos<nnXLen*nnYLen; pos++){
           whiteOwnerMap[pos] += other.whiteOwnerMap[pos];
+        }
+      }
+
+      if(other.midLayerFeatures != NULL) {
+        if(midLayerFeatures == NULL) {
+          midLayerFeatures = new float[324];
+          std::fill(midLayerFeatures, midLayerFeatures + 324, 0.0f);
+        }
+        for(int pos = 0; pos<324; pos++){
+          midLayerFeatures[pos] += other.midLayerFeatures[pos];
+        }
       }
     }
+
     if(whiteOwnerMap != NULL) {
       assert(whiteOwnerMapCount > 0);
-      for(int pos = 0; pos<nnXLen*nnYLen; pos++)
+      for(int pos = 0; pos<nnXLen*nnYLen; pos++){
         whiteOwnerMap[pos] /= whiteOwnerMapCount;
+      }
     }
   }
 
@@ -410,11 +438,11 @@ NNOutput::NNOutput(const vector<shared_ptr<NNOutput>>& others) {
       std::copy(other.policyProbs, other.policyProbs + NNPos::MAX_NN_POLICY_SIZE, policyProbs);
     }
     else {
-      for(int pos = 0; pos<NNPos::MAX_NN_POLICY_SIZE; pos++)
+      for(int pos = 0; pos<NNPos::MAX_NN_POLICY_SIZE; pos++){
         policyProbs[pos] /= floatLen;
+      }
     }
   }
-
 }
 
 NNOutput& NNOutput::operator=(const NNOutput& other) {
@@ -431,14 +459,29 @@ NNOutput& NNOutput::operator=(const NNOutput& other) {
 
   nnXLen = other.nnXLen;
   nnYLen = other.nnYLen;
-  if(whiteOwnerMap != NULL)
+  if(whiteOwnerMap != NULL){
     delete[] whiteOwnerMap;
+  }
+  if(midLayerFeatures != NULL){
+    delete[] midLayerFeatures;
+  }
+  
   if(other.whiteOwnerMap != NULL) {
     whiteOwnerMap = new float[nnXLen * nnYLen];
     std::copy(other.whiteOwnerMap, other.whiteOwnerMap + nnXLen * nnYLen, whiteOwnerMap);
   }
-  else
+  else{
     whiteOwnerMap = NULL;
+  }
+
+  if(other.midLayerFeatures != NULL) {
+    midLayerFeatures = new float[324];
+    std::copy(other.midLayerFeatures, other.midLayerFeatures + 324, midLayerFeatures);
+  }
+  else{
+    midLayerFeatures = NULL;
+  }
+
   if(noisedPolicyProbs != NULL)
     delete[] noisedPolicyProbs;
   if(other.noisedPolicyProbs != NULL) {
@@ -459,6 +502,12 @@ NNOutput::~NNOutput() {
     delete[] whiteOwnerMap;
     whiteOwnerMap = NULL;
   }
+
+  if(midLayerFeatures != NULL) {
+    delete[] midLayerFeatures;
+    midLayerFeatures = NULL;
+  }
+
   if(noisedPolicyProbs != NULL) {
     delete[] noisedPolicyProbs;
     noisedPolicyProbs = NULL;

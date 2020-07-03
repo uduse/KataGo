@@ -387,8 +387,12 @@ void NNEvaluator::serve(
         resultBuf->result->nnYLen = nnYLen;
         if(resultBuf->includeOwnerMap) {
           float* whiteOwnerMap = new float[nnXLen*nnYLen];
-          for(int i = 0; i<nnXLen*nnYLen; i++)
+          float* midLayerFeatures = new float[324];
+          std::fill(midLayerFeatures, midLayerFeatures + 324, 0.0f);
+          
+          for(int i = 0; i<nnXLen*nnYLen; i++) {
             whiteOwnerMap[i] = 0.0;
+          }
           for(int y = 0; y<boardYSize; y++) {
             for(int x = 0; x<boardXSize; x++) {
               int pos = NNPos::xyToPos(x,y,nnXLen);
@@ -396,9 +400,11 @@ void NNEvaluator::serve(
             }
           }
           resultBuf->result->whiteOwnerMap = whiteOwnerMap;
+          resultBuf->result->midLayerFeatures = midLayerFeatures;
         }
         else {
           resultBuf->result->whiteOwnerMap = NULL;
+          resultBuf->result->midLayerFeatures = NULL;
         }
 
         //These aren't really probabilities. Win/Loss/NoResult will get softmaxed later
@@ -436,10 +442,14 @@ void NNEvaluator::serve(
       assert(buf.resultBufs[row] != NULL);
       emptyOutput->nnXLen = nnXLen;
       emptyOutput->nnYLen = nnYLen;
-      if(buf.resultBufs[row]->includeOwnerMap)
+      if(buf.resultBufs[row]->includeOwnerMap){
         emptyOutput->whiteOwnerMap = new float[nnXLen*nnYLen];
-      else
+        emptyOutput->midLayerFeatures = new float[324];
+      }
+      else{
         emptyOutput->whiteOwnerMap = NULL;
+        emptyOutput->midLayerFeatures = NULL;
+      }
       outputBuf.push_back(emptyOutput);
     }
 

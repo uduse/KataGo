@@ -1852,6 +1852,9 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
     // float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
     // if (whiteOwnerMapFeature) {
     float* midLayerFeatures = node.nnOutput->midLayerFeatures;
+
+
+
     if (midLayerFeatures) {
       MemoryNodeStats stats = MemoryNodeStats();
       stats.winProb = winValue;
@@ -1884,6 +1887,7 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
     // if (whiteOwnerMapFeature) {
     
     float* midLayerFeatures = node.nnOutput->midLayerFeatures;
+
     if (midLayerFeatures) {
       MemoryNodeStats stats = MemoryNodeStats();
       stats.utility = utility;

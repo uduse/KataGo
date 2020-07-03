@@ -2668,7 +2668,7 @@ void NeuralNet::getOutput(
     //As above, these are NOT actually from white's perspective, but rather the player to move.
     //As usual the client does the postprocessing.
 
-    output->midLayerFeatures = new float[324];
+    // output->midLayerFeatures = new float[324];
 
     if(output->whiteOwnerMap != NULL) {
       assert(gpuHandle->model->numOwnershipChannels == 1);

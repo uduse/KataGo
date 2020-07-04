@@ -323,8 +323,8 @@ NNOutput::NNOutput(const NNOutput& other) {
 
 
   if(other.midLayerFeatures != NULL) {
-    midLayerFeatures = new float[15552];
-    std::copy(other.midLayerFeatures, other.midLayerFeatures + 15552, midLayerFeatures);
+    midLayerFeatures = new float[7776];
+    std::copy(other.midLayerFeatures, other.midLayerFeatures + 7776, midLayerFeatures);
   }
   else{
     midLayerFeatures = NULL;
@@ -399,10 +399,10 @@ NNOutput::NNOutput(const vector<shared_ptr<NNOutput>>& others) {
 
       if(other.midLayerFeatures != NULL) {
         if(midLayerFeatures == NULL) {
-          midLayerFeatures = new float[15552];
-          std::fill(midLayerFeatures, midLayerFeatures + 15552, 0.0f);
+          midLayerFeatures = new float[7776];
+          std::fill(midLayerFeatures, midLayerFeatures + 7776, 0.0f);
         }
-        for(int pos = 0; pos<15552; pos++){
+        for(int pos = 0; pos<7776; pos++){
           midLayerFeatures[pos] += other.midLayerFeatures[pos];
         }
       }
@@ -475,8 +475,8 @@ NNOutput& NNOutput::operator=(const NNOutput& other) {
   }
 
   if(other.midLayerFeatures != NULL) {
-    midLayerFeatures = new float[15552];
-    std::copy(other.midLayerFeatures, other.midLayerFeatures + 15552, midLayerFeatures);
+    midLayerFeatures = new float[7776];
+    std::copy(other.midLayerFeatures, other.midLayerFeatures + 7776, midLayerFeatures);
   }
   else{
     midLayerFeatures = NULL;

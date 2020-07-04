@@ -98,6 +98,9 @@ MemoryNodeStats Memory::query(float* featureVector){
 	double similarity;
 	for(int i=0;i<memArray.size();i++){
 		similarity = cosine_similarity(featureVector, memArray[i].feature, this->featureDimension);
+		if(similarity != 1){
+			similarity -= 0.05;
+		}
 		top_neighbours.push(make_pair(-similarity, i));
 		if(top_neighbours.size() > this->numNeighbors){
 			top_neighbours.pop();

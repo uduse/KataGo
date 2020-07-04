@@ -387,8 +387,8 @@ void NNEvaluator::serve(
         resultBuf->result->nnYLen = nnYLen;
         if(resultBuf->includeOwnerMap) {
           float* whiteOwnerMap = new float[nnXLen*nnYLen];
-          float* midLayerFeatures = new float[324];
-          std::fill(midLayerFeatures, midLayerFeatures + 324, 0.0f);
+          float* midLayerFeatures = new float[15552];
+          std::fill(midLayerFeatures, midLayerFeatures + 15552, 0.0f);
           
           for(int i = 0; i<nnXLen*nnYLen; i++) {
             whiteOwnerMap[i] = 0.0;
@@ -444,7 +444,7 @@ void NNEvaluator::serve(
       emptyOutput->nnYLen = nnYLen;
       if(buf.resultBufs[row]->includeOwnerMap){
         emptyOutput->whiteOwnerMap = new float[nnXLen*nnYLen];
-        emptyOutput->midLayerFeatures = new float[324];
+        emptyOutput->midLayerFeatures = new float[15552];
       }
       else{
         emptyOutput->whiteOwnerMap = NULL;

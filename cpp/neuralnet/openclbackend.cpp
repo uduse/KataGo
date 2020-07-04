@@ -2678,7 +2678,7 @@ void NeuralNet::getOutput(
         output->whiteOwnerMap
       );
 
-      FeatureHashing(midLayerFeatureOutput + (row * midLayerFeatureSize), output->midLayerFeatures, midLayerFeatureSize, 324);
+      // FeatureHashing(midLayerFeatureOutput + (row * midLayerFeatureSize), output->midLayerFeatures, midLayerFeatureSize, 15552);
 
      // output->midLayerFeatures
 
@@ -2688,11 +2688,11 @@ void NeuralNet::getOutput(
       // }
       // cout << endl;
       
-      // std::copy(
-        // midLayerFeatureOutput + row * midLayerFeatureSize,
-        // midLayerFeatureOutput + (row+1) * midLayerFeatureSize,
-        // output->midLayerFeatures
-      // );
+      std::copy(
+        midLayerFeatureOutput + row * midLayerFeatureSize,
+        midLayerFeatureOutput + (row+1) * midLayerFeatureSize,
+        output->midLayerFeatures
+      );
     }
 
     if(version >= 8) {

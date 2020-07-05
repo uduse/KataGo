@@ -1887,15 +1887,13 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
     // if (whiteOwnerMapFeature) {
     
     float* midLayerFeatures = node.nnOutput->midLayerFeatures;
-
+    
     if (midLayerFeatures) {
       MemoryNodeStats stats = MemoryNodeStats();
       stats.utility = utility;
       stats.visits = 1;
       if (useMemory && (memoryPtr->memArray.size() >= memoryPtr->numNeighbors)) {
         auto query = memoryPtr->query(midLayerFeatures);
-        cout << "origUtility: " << utility << endl;
-        cout << "queryUtility: " << query.utility << endl;
         // cout << "numVisits: " << query.visits << endl;
         utility = mergeMemoryValue(utility, query.utility, nodeLambda);
       }

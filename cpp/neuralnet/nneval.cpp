@@ -388,8 +388,8 @@ void NNEvaluator::serve(
         if(resultBuf->includeOwnerMap) {
           float* whiteOwnerMap = new float[nnXLen*nnYLen];
           float* midLayerFeatures = new float[15552];
-          std::fill(midLayerFeatures, midLayerFeatures + 15552, 0.0f);
           
+          std::fill(midLayerFeatures, midLayerFeatures + 15552, 0.0f);
           for(int i = 0; i<nnXLen*nnYLen; i++) {
             whiteOwnerMap[i] = 0.0;
           }

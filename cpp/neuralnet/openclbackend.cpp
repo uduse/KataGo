@@ -2687,7 +2687,11 @@ void NeuralNet::getOutput(
       	// cout << i << endl;
       // }
       // cout << endl;
-      
+      if(output->midLayerFeatures == NULL) {
+        output->midLayerFeatures = new float[15552];
+      }
+
+
       std::copy(
         midLayerFeatureOutput + row * midLayerFeatureSize,
         midLayerFeatureOutput + (row+1) * midLayerFeatureSize,
@@ -2724,7 +2728,7 @@ void NeuralNet::getOutput(
       ASSERT_UNREACHABLE;
     }
   }
-
+  free(midLayerFeatureOutput);
 }
 
 

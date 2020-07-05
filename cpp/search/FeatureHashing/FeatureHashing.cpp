@@ -17,7 +17,6 @@ void FeatureHashing(float* bigArray, float* smallArray, int bigDimension, int sm
 	for(int i=0;i<bigDimension;i++){
 		smallArray[h(i) % smallDimension] += E(i) * bigArray[i];
 	}
-	free(bigArray);
 }
 
 

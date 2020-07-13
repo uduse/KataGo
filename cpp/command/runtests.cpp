@@ -192,9 +192,9 @@ int MainCmds::runmmctstests(int argc, const char *const *argv) {
   std::this_thread::sleep_for(std::chrono::duration<double>(0.1));
 
   std::ifstream infile;
-  infile.open("out.txt");
+  infile.open(std::string(argv[2]));
   std::ofstream outfile;
-  outfile.open("data.txt");
+  outfile.open(std::string(argv[3]));
 
   std::string line;
   while (std::getline(infile, line)) {

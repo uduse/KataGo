@@ -94,13 +94,14 @@ void Memory::update(Hash128 hash, float* featureVector, MemoryNodeStats stats){
 }
 
 MemoryNodeStats Memory::query(float* featureVector){
-	float A_max = *(max_element(featureVector, featureVector + this->featureDimension));
+	// float A_max = *(max_element(featureVector, featureVector + this->featureDimension));
+	// cout << A_max << endl;
 	// cout << *(max_element(featureVector, featureVector + this->featureDimension)) << endl;
 	priority_queue<pair<double, int> > top_neighbours;
 	double similarity;
 	for(int i=0;i<memArray.size();i++){
-		similarity = cosine_similarity(featureVector, memArray[i].feature, A_max, 1, this->featureDimension);
-		cout << similarity << endl;
+		similarity = cosine_similarity(featureVector, memArray[i].feature, this->featureDimension);
+		// cout << similarity << endl;
 		top_neighbours.push(make_pair(-similarity, i));
 		if(top_neighbours.size() > this->numNeighbors){
 			top_neighbours.pop();

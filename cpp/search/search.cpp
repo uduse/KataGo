@@ -183,7 +183,7 @@ Search::Search(SearchParams params, NNEvaluator* nnEval, const string& rSeed)
 
   // const uint64_t featureDim = nnXLen * nnYLen * 192;
 
-  const int featureDim = 324;
+  const int featureDim = 15552;
 
   // const uint64_t featureDim = nnXLen * nnYLen;
 
@@ -1889,11 +1889,14 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
     float* midLayerFeatures = node.nnOutput->midLayerFeatures;
     
     if (midLayerFeatures) {
+    // float max = *(max_element(midLayerFeatures, midLayerFeatures + 15552));
+    // cout << max << endl;
       MemoryNodeStats stats = MemoryNodeStats();
       stats.utility = utility;
       stats.visits = 1;
       if (useMemory && (memoryPtr->memArray.size() >= memoryPtr->numNeighbors)) {
         auto query = memoryPtr->query(midLayerFeatures);
+        // cout << utility << " " << query.utility << endl;
         // cout << "numVisits: " << query.visits << endl;
         utility = mergeMemoryValue(utility, query.utility, nodeLambda);
       }

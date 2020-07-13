@@ -2691,12 +2691,17 @@ void NeuralNet::getOutput(
         output->midLayerFeatures = new float[15552];
       }
 
+      float max = *(max_element(midLayerFeatureOutput + row * midLayerFeatureSize, midLayerFeatureOutput + (row + 1) * midLayerFeatureSize));
 
-      std::copy(
-        midLayerFeatureOutput + row * midLayerFeatureSize,
-        midLayerFeatureOutput + (row+1) * midLayerFeatureSize,
-        output->midLayerFeatures
-      );
+      for(int i=0;i<midLayerFeatureSize;i++){
+        output->midLayerFeatures[i] = midLayerFeatureOutput[(row * midLayerFeatureSize + i)] / max;
+      }
+
+      // std::copy(
+      //   midLayerFeatureOutput + row * midLayerFeatureSize,
+      //   midLayerFeatureOutput + (row+1) * midLayerFeatureSize,
+      //   output->midLayerFeatures
+      // );
     }
 
     if(version >= 8) {

@@ -12,7 +12,13 @@ Node::Node(Hash128 hash, float* features, int featureSize, MemoryNodeStats stats
 	this->hash = hash;
 	this->featureSize = featureSize;
 	feature = (float*) malloc(featureSize * sizeof(float));
-	copy(features, features + featureSize, this->feature);
+	float maxValue = *(max_element(features, features + featureSize));
+	// cout << maxValue << endl;
+	for(int i=0;i<featureSize;i++){
+		this->feature[i] = features[i] / maxValue;
+	}
+	// copy(features, features + featureSize, this->feature);
+	// cout << *(max_element(this->feature, this->feature + featureSize)) << endl;
 	this->stats.winProb = stats_.winProb;
 	this->stats.noResultProb = stats_.noResultProb;
 	this->stats.scoreMean = stats_.scoreMean;

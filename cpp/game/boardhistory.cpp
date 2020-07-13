@@ -1,8 +1,12 @@
+#include "../external/nlohmann_json/json.hpp"
 #include "../game/boardhistory.h"
+
+using json = nlohmann::json;
 
 #include <algorithm>
 
 using namespace std;
+
 
 static Hash128 getKoHash(const Rules& rules, const Board& board, Player pla, int encorePhase, Hash128 koRecapBlockHash) {
   if(rules.koRule == Rules::KO_SITUATIONAL || rules.koRule == Rules::KO_SIMPLE || encorePhase > 0)
@@ -1022,6 +1026,21 @@ void BoardHistory::makeBoardMoveAssumeLegal(Board& board, Loc moveLoc, Player mo
     }
   }
 
+}
+json BoardHistory::toJson() const {
+  json data;
+//  data["type"] = "history";
+  data["initialBoard"] = initialBoard.pos_hash.toString();
+  data["rules"] = rules.toString();
+  std::vector<Loc> locs;
+  std::vector<Player> players;
+  for (const auto &move : moveHistory) {
+    locs.push_back(move.loc);
+    players.push_back(move.pla);
+  }
+  data["locs"] = locs;
+  data["players"] = players;
+  return data;
 }
 
 KoHashTable::KoHashTable()

@@ -5,6 +5,10 @@
 #include "../core/hash.h"
 #include "../game/board.h"
 #include "../game/rules.h"
+#include "../external/nlohmann_json/json.hpp"
+
+using json = nlohmann::json;
+
 
 struct KoHashTable;
 
@@ -159,6 +163,8 @@ struct BoardHistory {
   //Takes into account assumeMultipleStartingBlackMovesAreHandicap
   int computeNumHandicapStones() const;
   int computeWhiteHandicapBonus() const;
+
+  json toJson() const;
 
 private:
   bool koHashOccursInHistory(Hash128 koHash, const KoHashTable* rootKoHashTable) const;

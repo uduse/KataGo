@@ -55,6 +55,9 @@ struct Hash128
   Hash128& operator&=(const Hash128 other);
 
   friend std::ostream& operator<<(std::ostream& out, const Hash128 other);
+
+  std::string toString() const;
+  static Hash128 fromString(const std::string &string);
 };
 
 inline Hash128::Hash128()
@@ -121,6 +124,17 @@ inline Hash128& Hash128::operator&=(const Hash128 other) {
   hash0 &= other.hash0;
   hash1 &= other.hash1;
   return *this;
+}
+
+inline std::string Hash128::toString() const {
+  return std::to_string(hash0) + ',' + std::to_string(hash1);
+}
+
+inline Hash128 Hash128::fromString(const std::string &string) {
+  auto pos = string.find(',');
+  auto first = string.substr(0, pos);
+  auto second = string.substr(pos + 1);
+  return Hash128(std::stoull(first), std::stoull(second));
 }
 
 inline std::size_t hash_value(const Hash128 &hash) {

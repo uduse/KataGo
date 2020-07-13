@@ -10,7 +10,9 @@
 #include "../core/fancymath.h"
 #include "../core/timer.h"
 #include "../search/distributiontable.h"
+#include "../external/nlohmann_json/json.hpp"
 
+using json = nlohmann::json;
 using namespace std;
 
 ReportedSearchValues::ReportedSearchValues()
@@ -180,7 +182,6 @@ Search::Search(SearchParams params, NNEvaluator* nnEval, const string& rSeed)
   rootHistory.clear(rootBoard,rootPla,Rules(),0);
   rootKoHashTable->recompute(rootHistory);
 
-  std::cout << "nnXLen" << nnXLen << "nnYLen" << nnYLen << std::endl;
   const uint64_t featureDim = nnXLen * nnYLen;
   std::unique_ptr<Aggregator> aggregatorPtr = std::make_unique<AverageAggregator>();
   memoryPtr = std::make_unique<Memory>(
@@ -1656,17 +1657,18 @@ void Search::addLeafValue(SearchNode &node, SearchThread &thread, double winValu
     + getScoreUtility(scoreMean, scoreMeanSq, 1.0);
 
   if (node.nnOutput) {
+
     float *ownership = node.nnOutput->whiteOwnerMap;
     float whiteWinProb = node.nnOutput->whiteWinProb;
-    std::string repr;
-    repr += "DATA_LOG:";
-    repr += std::to_string(whiteWinProb);
-    repr += '\t';
-    for (int i = 0; i < memoryPtr->getFeatureDim(); i++) {
-      repr += std::to_string(ownership[i]);
-      repr += '\t';
-    }
-    thread.logger->write(repr);
+    int ownershipSize = node.nnOutput->nnXLen * node.nnOutput->nnYLen;
+
+    json data;
+    data["whiteWinProb"] = whiteWinProb;
+    data["whiteOwnerMap"] = std::vector<float>(ownership, ownership + ownershipSize);
+
+    auto historyJson = thread.history.toJson();
+    data["history"] = historyJson;
+    thread.logger->write("JSON_DATA:" + data.dump());
   }
 
   while(node.statsLock.test_and_set(std::memory_order_acquire));

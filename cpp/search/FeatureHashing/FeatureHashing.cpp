@@ -1,8 +1,14 @@
 #include "FeatureHashing.h"
-#include <string.h>
+#include "smartgame/SgHash.h"
+#include <algorithm>
 
 int h(int x){
 	return x;
+}
+
+int h1(int x){
+	SgHash<32> hash(x);	
+	return hash.Code1();
 }
 
 int E(int x){
@@ -15,16 +21,16 @@ int E(int x){
 void FeatureHashing(float* bigArray, float* smallArray, int bigDimension, int smallDimension){
 	memset(smallArray, 0, smallDimension);
 	for(int i=0;i<bigDimension;i++){
-		smallArray[h(i) % smallDimension] += E(i) * bigArray[i];
+		int hashValue = h1(i);
+		smallArray[hashValue % smallDimension] += E(hashValue) * bigArray[i];
+	}
+
+	float max = *(max_element(smallArray, smallArray + smallDimension));
+	// cout << "max: " << max << endl;
+	for(int i=0;i<smallDimension;i++){
+		smallArray[i] = smallArray[i] / max;
 	}
 }
-
-
-
-
-
-
-
 /*
 
 int main(){

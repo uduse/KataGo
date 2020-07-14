@@ -169,8 +169,24 @@ add_executable(katago
   search/DyMeNNS/node.cpp
   search/DyMeNNS/memory.h
   search/DyMeNNS/memory.cpp
+
+
+
+  search/FeatureHashing/smartgame/SgSystem.h
+  search/FeatureHashing/smartgame/SgSystem.cpp
+  search/FeatureHashing/smartgame/SgHash.h
+  search/FeatureHashing/smartgame/SgArray.h
+  search/FeatureHashing/smartgame/SgException.h
+  search/FeatureHashing/smartgame/SgException.cpp
+  search/FeatureHashing/smartgame/SgRandom.h
+  search/FeatureHashing/smartgame/SgRandom.cpp
+  search/FeatureHashing/smartgame/SgDebug.h
+  search/FeatureHashing/smartgame/SgDebug.cpp
+  search/FeatureHashing/smartgame/SgTime.h
+
   search/FeatureHashing/FeatureHashing.h
   search/FeatureHashing/FeatureHashing.cpp
+
 
   program/gtpconfig.cpp
   program/setup.cpp
@@ -297,10 +313,10 @@ if(CMAKE_COMPILER_IS_GNUCC)
   endif()
 
   if(USE_TCMALLOC)
-    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -O2 -Wl,--no-as-needed -ldl -pedantic -Wall -Wextra -Wno-sign-compare -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Woverloaded-virtual -Wredundant-decls -Wshadow -Wstrict-null-sentinel -Wstrict-overflow=1 -Wswitch-default -Wfloat-conversion -Wnull-dereference -Wunused -Walloc-zero -Wduplicated-branches -Wduplicated-cond -Wdangling-else -Wrestrict -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fpermissive -g -O2 -Wl,--no-as-needed -ldl -pedantic -Wall -Wextra -Wno-sign-compare -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Woverloaded-virtual -Wredundant-decls -Wshadow -Wstrict-null-sentinel -Wstrict-overflow=1 -Wswitch-default -Wfloat-conversion -Wnull-dereference -Wunused -Walloc-zero -Wduplicated-branches -Wduplicated-cond -Wdangling-else -Wrestrict -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free")
   else()
-    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -O2 -Wl,--no-as-needed -ldl -pedantic -Wall -Wextra -Wno-sign-compare -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Woverloaded-virtual -Wredundant-decls -Wshadow -Wstrict-null-sentinel -Wstrict-overflow=1 -Wswitch-default -Wfloat-conversion -Wnull-dereference -Wunused -Walloc-zero -Wduplicated-branches -Wduplicated-cond -Wdangling-else -Wrestrict")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fpermissive -g -O2 -Wl,--no-as-needed -ldl -pedantic -Wall -Wextra -Wno-sign-compare -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Woverloaded-virtual -Wredundant-decls -Wshadow -Wstrict-null-sentinel -Wstrict-overflow=1 -Wswitch-default -Wfloat-conversion -Wnull-dereference -Wunused -Walloc-zero -Wduplicated-branches -Wduplicated-cond -Wdangling-else -Wrestrict")
   endif()
 endif()
 

@@ -2691,11 +2691,26 @@ void NeuralNet::getOutput(
         output->midLayerFeatures = new float[15552];
       }
 
-      float max = *(max_element(midLayerFeatureOutput + row * midLayerFeatureSize, midLayerFeatureOutput + (row + 1) * midLayerFeatureSize));
+      
+      // float max = *(max_element(midLayerFeatureOutput + row * midLayerFeatureSize, midLayerFeatureOutput + (row + 1) * midLayerFeatureSize));
+      float norm = 0;
+      for(int i=0;i<midLayerFeatureSize;i++){
+        norm += midLayerFeatureOutput[(row * midLayerFeatureSize + i)] * midLayerFeatureOutput[(row * midLayerFeatureSize + i)];
+        // output->midLayerFeatures[i] = midLayerFeatureOutput[(row * midLayerFeatureSize + i)] * midLayerFeatureOutput[(row * midLayerFeatureSize + i)];
+      }
+      // cout << norm << endl;
+      norm = sqrt(norm);
+      // cout << norm << " " << max << endl;
 
       for(int i=0;i<midLayerFeatureSize;i++){
-        output->midLayerFeatures[i] = midLayerFeatureOutput[(row * midLayerFeatureSize + i)] / max;
+        output->midLayerFeatures[i] = midLayerFeatureOutput[(row * midLayerFeatureSize + i)] / norm;
       }
+
+      // float max = *(max_element(output->midLayerFeatures, output->midLayerFeatures + midLayerFeatureSize));
+      // norm = sqrt(norm);
+
+      // cout << max << endl;
+
 
       // std::copy(
       //   midLayerFeatureOutput + row * midLayerFeatureSize,

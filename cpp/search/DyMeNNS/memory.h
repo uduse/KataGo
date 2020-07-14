@@ -9,6 +9,7 @@
 #include "../../core/hash.h"
 #include "node.h"
 #include "utils.h"
+#include "../FeatureHashing/FeatureHashing.h"
 
 enum aggregators {weighted_average, weighted_softmax};
 

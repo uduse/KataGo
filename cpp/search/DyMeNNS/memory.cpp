@@ -94,14 +94,49 @@ void Memory::update(Hash128 hash, float* featureVector, MemoryNodeStats stats){
 }
 
 MemoryNodeStats Memory::query(float* featureVector){
-	// float A_max = *(max_element(featureVector, featureVector + this->featureDimension));
-	// cout << A_max << endl;
-	// cout << *(max_element(featureVector, featureVector + this->featureDimension)) << endl;
 	priority_queue<pair<double, int> > top_neighbours;
 	double similarity;
 	for(int i=0;i<memArray.size();i++){
 		similarity = cosine_similarity(featureVector, memArray[i].feature, this->featureDimension);
+		
+/*
+		int smallFeatureDimension = 15552 / 2;		
+		float* smallVector1 = new float[smallFeatureDimension];
+		float* smallVector2 = new float[smallFeatureDimension];
+		FeatureHashing(featureVector, smallVector1, 15552, smallFeatureDimension);
+		FeatureHashing(memArray[i].feature, smallVector2, 15552, smallFeatureDimension);
+
+		// cout << *(max_element(memArray[i].feature, memArray[i].feature + 15552)) << endl;
+		float norm1 = 0;		
+		for(int j=0;j<smallFeatureDimension;j++){
+			norm1 += smallVector1[j] * smallVector1[j];
+		}
+		norm1 = sqrt(norm1);
+
+		float norm2 = 0;
+		for(int j=0;j<smallFeatureDimension;j++){
+			norm2 += smallVector2[j] * smallVector2[j];
+		}
+		norm2 = sqrt(norm2);
+
+		// cout << norm1 << " " << norm2 << endl;
+
+		// float max2 = *(max_element(smallVector2, smallVector2 + smallFeatureDimension));
+		for(int j=0;j<smallFeatureDimension;j++){
+			smallVector1[i] /= norm1;
+		}
+		for(int j=0;j<smallFeatureDimension;j++){
+			smallVector2[i] /= norm2;
+		}
+
+		// cout << *(max_element(smallVector2, smallVector2 + smallFeatureDimension)) << endl;
+		
+		double similarity2 = cosine_similarity(smallVector1, smallVector2, smallFeatureDimension);
+		
+*/		
+		//// cout << similarity << " " << similarity2 << endl;
 		// cout << similarity << endl;
+
 		top_neighbours.push(make_pair(-similarity, i));
 		if(top_neighbours.size() > this->numNeighbors){
 			top_neighbours.pop();

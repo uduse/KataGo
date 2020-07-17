@@ -134,7 +134,7 @@ MemoryNodeStats Memory::query(float* featureVector){
 		double similarity2 = cosine_similarity(smallVector1, smallVector2, smallFeatureDimension);
 		
 */		
-		//// cout << similarity << " " << similarity2 << endl;
+		// cout << similarity << " " << similarity2 << endl;
 		// cout << similarity << endl;
 
 		top_neighbours.push(make_pair(-similarity, i));

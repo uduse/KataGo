@@ -6,29 +6,40 @@ int h(int x){
 	return x;
 }
 
-int h1(int x){
+int h1Hash(int x){
 	SgHash<32> hash(x);	
 	return hash.Code1();
 }
 
 int E(int x){
-	if(x%2 == 0){
-		return 1;
-	}
-	return -1;
+	return ((x % 2 == 1) ? 1 : -1);
+	// if(x%2 == 0){
+	// 	return 1;
+	// }
+	// return -1;
 }
 
 void FeatureHashing(float* bigArray, float* smallArray, int bigDimension, int smallDimension){
 	memset(smallArray, 0, smallDimension);
 	for(int i=0;i<bigDimension;i++){
-		int hashValue = h1(i);
+		int hashValue = h1Hash(i);
 		smallArray[hashValue % smallDimension] += E(hashValue) * bigArray[i];
 	}
 
-	float max = *(max_element(smallArray, smallArray + smallDimension));
+	float norm = 0;		
+	for(int j=0;j<smallDimension;j++){
+		norm += smallArray[j] * smallArray[j];
+	}
+	norm = sqrt(norm);
+
+
+
+
+
+	// float max = *(max_element(smallArray, smallArray + smallDimension));
 	// cout << "max: " << max << endl;
 	for(int i=0;i<smallDimension;i++){
-		smallArray[i] = smallArray[i] / max;
+		smallArray[i] = smallArray[i] / norm;
 	}
 }
 /*

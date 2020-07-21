@@ -2668,8 +2668,6 @@ void NeuralNet::getOutput(
     //As above, these are NOT actually from white's perspective, but rather the player to move.
     //As usual the client does the postprocessing.
 
-    // output->midLayerFeatures = new float[324];
-
     if(output->whiteOwnerMap != NULL) {
       assert(gpuHandle->model->numOwnershipChannels == 1);
       std::copy(
@@ -2678,45 +2676,21 @@ void NeuralNet::getOutput(
         output->whiteOwnerMap
       );
 
-      // FeatureHashing(midLayerFeatureOutput + (row * midLayerFeatureSize), output->midLayerFeatures, midLayerFeatureSize, 15552);
-
-     // output->midLayerFeatures
-
-      // for(int i=0;i<4000;i++){
-      	// cout << output->midLayerFeatures[i] << " ";
-      	// cout << i << endl;
-      // }
-      // cout << endl;
       if(output->midLayerFeatures == NULL) {
         output->midLayerFeatures = new float[15552];
       }
 
-      
-      // float max = *(max_element(midLayerFeatureOutput + row * midLayerFeatureSize, midLayerFeatureOutput + (row + 1) * midLayerFeatureSize));
       float norm = 0;
       for(int i=0;i<midLayerFeatureSize;i++){
         norm += midLayerFeatureOutput[(row * midLayerFeatureSize + i)] * midLayerFeatureOutput[(row * midLayerFeatureSize + i)];
-        // output->midLayerFeatures[i] = midLayerFeatureOutput[(row * midLayerFeatureSize + i)] * midLayerFeatureOutput[(row * midLayerFeatureSize + i)];
       }
-      // cout << norm << endl;
+
       norm = sqrt(norm);
-      // cout << norm << " " << max << endl;
 
       for(int i=0;i<midLayerFeatureSize;i++){
         output->midLayerFeatures[i] = midLayerFeatureOutput[(row * midLayerFeatureSize + i)] / norm;
       }
 
-      // float max = *(max_element(output->midLayerFeatures, output->midLayerFeatures + midLayerFeatureSize));
-      // norm = sqrt(norm);
-
-      // cout << max << endl;
-
-
-      // std::copy(
-      //   midLayerFeatureOutput + row * midLayerFeatureSize,
-      //   midLayerFeatureOutput + (row+1) * midLayerFeatureSize,
-      //   output->midLayerFeatures
-      // );
     }
 
     if(version >= 8) {

@@ -170,20 +170,6 @@ add_executable(katago
   search/DyMeNNS/memory.h
   search/DyMeNNS/memory.cpp
 
-
-
-  search/FeatureHashing/smartgame/SgSystem.h
-  search/FeatureHashing/smartgame/SgSystem.cpp
-  search/FeatureHashing/smartgame/SgHash.h
-  search/FeatureHashing/smartgame/SgArray.h
-  search/FeatureHashing/smartgame/SgException.h
-  search/FeatureHashing/smartgame/SgException.cpp
-  search/FeatureHashing/smartgame/SgRandom.h
-  search/FeatureHashing/smartgame/SgRandom.cpp
-  search/FeatureHashing/smartgame/SgDebug.h
-  search/FeatureHashing/smartgame/SgDebug.cpp
-  search/FeatureHashing/smartgame/SgTime.h
-
   search/FeatureHashing/FeatureHashing.h
   search/FeatureHashing/FeatureHashing.cpp
 

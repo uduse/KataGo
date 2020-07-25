@@ -2682,14 +2682,17 @@ void NeuralNet::getOutput(
 
       float norm = 0;
       for(int i=0;i<midLayerFeatureSize;i++){
-        norm += midLayerFeatureOutput[(row * midLayerFeatureSize + i)] * midLayerFeatureOutput[(row * midLayerFeatureSize + i)];
+        norm += pow(midLayerFeatureOutput[(row * midLayerFeatureSize + i)], 2.0);
+        // norm += midLayerFeatureOutput[(row * midLayerFeatureSize + i)] * midLayerFeatureOutput[(row * midLayerFeatureSize + i)];
       }
 
       norm = sqrt(norm);
 
       for(int i=0;i<midLayerFeatureSize;i++){
-        output->midLayerFeatures[i] = midLayerFeatureOutput[(row * midLayerFeatureSize + i)] / norm;
+        midLayerFeatureOutput[(row * midLayerFeatureSize + i)] /= norm;
       }
+
+      FeatureHashing(midLayerFeatureOutput + (row * midLayerFeatureSize), output->midLayerFeatures, 15552, 1944);
 
     }
 
@@ -2722,7 +2725,7 @@ void NeuralNet::getOutput(
       ASSERT_UNREACHABLE;
     }
   }
-  free(midLayerFeatureOutput);
+  delete[] midLayerFeatureOutput;
 }
 
 

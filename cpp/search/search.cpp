@@ -183,7 +183,7 @@ Search::Search(SearchParams params, NNEvaluator* nnEval, const string& rSeed)
 
   // const uint64_t featureDim = nnXLen * nnYLen * 192;
 
-  const int featureDim = 15552;
+  const int featureDim = 1944;
 
   // const uint64_t featureDim = nnXLen * nnYLen;
 

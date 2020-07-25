@@ -2677,7 +2677,7 @@ void NeuralNet::getOutput(
       );
 
       if(output->midLayerFeatures == NULL) {
-        output->midLayerFeatures = new float[15552];
+        output->midLayerFeatures = new float[1944];
       }
 
       float norm = 0;

@@ -1,76 +1,59 @@
 #include "FeatureHashing.h"
-// #include "smartgame/SgHash.h"
-#include <algorithm>
-#include <cmath>
 
-int h(int x){
+int hash1(int x){
 	return x;
 }
 
-// int h1Hash(int x){
-// 	SgHash<32> hash(x);	
-// 	return hash.Code1();
-// }
+int hash2(int x){
+	uint32_t seed = 0;
+	uint32_t hash_output[1] = {0};
+	const int *key = &x;
+	MurmurHash3_x86_32(key, sizeof(int), seed, hash_output); // 0xb6d99cf8
+	return hash_output[0];
+}
 
 int E(int x){
 	return ((x % 2 == 1) ? 1 : -1);
-	// if(x%2 == 0){
-	// 	return 1;
-	// }
-	// return -1;
 }
 
 void FeatureHashing(float* bigArray, float* smallArray, int bigDimension, int smallDimension){
-	memset(smallArray, 0, smallDimension);
+	memset(smallArray, 0, sizeof(float) * smallDimension);
+
 	for(int i=0;i<bigDimension;i++){
-		int hashValue = h(i);
-		smallArray[hashValue % smallDimension] += E(hashValue) * bigArray[i];
+		int hashValue = hash2(i);
+		smallArray[hashValue % smallDimension >=0 ? hashValue % smallDimension : (hashValue % smallDimension) + smallDimension] += E(i) * bigArray[i];
 	}
 
-
-	float norm = 0;		
-	for(int j=0;j<smallDimension;j++){
-		norm += smallArray[j] * smallArray[j];
-	}
-	norm = sqrt(norm);
-
-	for(int i=0;i<smallDimension;i++){
-		smallArray[i] = smallArray[i] / norm;
-	}
-
+	float norm = sqrt(computeDotProduct(smallArray, smallArray, smallDimension));
+	normalizeArray(smallArray, smallDimension, norm);
 }
-
 /*
+
 int main(){
-	// float* bigArray = new float[12];
-	float bigArray[12] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+	int bigDimension = 15552;
+	float bigArray1[bigDimension], bigArray2[bigDimension];
+	srand(time(0)); 
 
-	float norm = 0;
-
-	for(int i=0;i<12;i++){
-		norm += bigArray[i] * bigArray[i];
+	for(int i=0;i<bigDimension;i++){
+		bigArray1[i] = ((float) rand()) / (float) RAND_MAX;
+		bigArray2[i] = ((float) rand()) / (float) RAND_MAX;
 	}
 
-	norm = sqrt(norm);
+	float norm1 = sqrt(computeDotProduct(bigArray1, bigArray1, bigDimension));
+	float norm2 = sqrt(computeDotProduct(bigArray2, bigArray2, bigDimension));
 
-	cout << "norm: " << norm << endl;
+	normalizeArray(bigArray1, bigDimension, norm1);
+	normalizeArray(bigArray2, bigDimension, norm2);
 
-	for(int i=0;i<12;i++){
-		bigArray[i] /= norm;
-	}
+	norm1 = sqrt(computeDotProduct(bigArray1, bigArray1, bigDimension));
+	norm2 = sqrt(computeDotProduct(bigArray2, bigArray2, bigDimension));
 
-	norm = sqrt(norm);
+	int smallDimension = 2000;
+	float smallArray1[smallDimension], smallArray2[smallDimension];
+	FeatureHashing(bigArray1, smallArray1, bigDimension, smallDimension);
+	FeatureHashing(bigArray2, smallArray2, bigDimension, smallDimension);
 
-
-
-	float* smallArray = new float[4];
-
-	FeatureHashing(bigArray, smallArray, 12, 4);
-
-	for(int i=0;i<4;i++){
-		cout << smallArray[i] << " ";
-	}
-	cout << endl;
+	cout << computeDotProduct(bigArray1, bigArray2, bigDimension) << " " << computeDotProduct(smallArray1, smallArray2, smallDimension) << endl;
 
 	return 0;
 }

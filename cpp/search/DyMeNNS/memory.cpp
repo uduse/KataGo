@@ -99,43 +99,29 @@ MemoryNodeStats Memory::query(float* featureVector){
 	double similarity;
 	for(int i=0;i<memArray.size();i++){
 		similarity = cosine_similarity(featureVector, memArray[i].feature, this->featureDimension);
+		// cout << similarity << endl;
 		
 		// cout << getNorm(featureVector, this->featureDimension) << " " << getNorm(memArray[i].feature, featureDimension) << endl;
-
-		// int smallFeatureDimension = 324;
-		// float* smallVector1 = new float[smallFeatureDimension];
-		// float* smallVector2 = new float[smallFeatureDimension];
+/*
+		int smallFeatureDimension = 4000;
+		float* smallVector1 = new float[smallFeatureDimension];
+		float* smallVector2 = new float[smallFeatureDimension];
 		
-		// FeatureHashing(featureVector, smallVector1, 15552, smallFeatureDimension);
-		// FeatureHashing(memArray[i].feature, smallVector2, 15552, smallFeatureDimension);
+		FeatureHashing(featureVector, smallVector1, 15552, smallFeatureDimension);
+		FeatureHashing(memArray[i].feature, smallVector2, 15552, smallFeatureDimension);
 		
-		// float dot_product = 0;
-		// 
-		// for(int j=0;j<smallFeatureDimension;j++){
-			// dot_product += smallVector1[j] * smallVector2[j];
-		// }
+		float dot_product = 0; 
+		for(int j=0;j<smallFeatureDimension;j++){
+			dot_product += smallVector1[j] * smallVector2[j];
+		}
 
-		// cout << similarity << " " << dot_product << endl;
-
-		// for(int j=0;j<smallFeatureDimension;j++){
-			//smallVector1[i] /= norm1;
-		// }
-
-		// for(int j=0;j<smallFeatureDimension;j++){
-			// smallVector2[i] /= norm2;
-		// }
-
-		// cout << *(max_element(smallVector2, smallVector2 + smallFeatureDimension)) << endl;
-		
-		// double similarity2 = cosine_similarity(smallVector1, smallVector2, smallFeatureDimension);
-		
-		// cout << similarity << " " << similarity2 << endl;
-		// cout << similarity << endl;
-
+		cout << similarity << " " << dot_product << endl;
+*/
 		top_neighbours.push(make_pair(-similarity, i));
 		if(top_neighbours.size() > this->numNeighbors){
 			top_neighbours.pop();
 		}
+
 	}
 
 	

@@ -172,7 +172,10 @@ add_executable(katago
 
   search/FeatureHashing/FeatureHashing.h
   search/FeatureHashing/FeatureHashing.cpp
-
+  search/FeatureHashing/MurmurHash3.h
+  search/FeatureHashing/MurmurHash3.cpp
+  search/FeatureHashing/utils.h
+  search/FeatureHashing/utils.cpp
 
   program/gtpconfig.cpp
   program/setup.cpp

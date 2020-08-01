@@ -2677,7 +2677,7 @@ void NeuralNet::getOutput(
       );
 
       if(output->midLayerFeatures == NULL) {
-        output->midLayerFeatures = new float[1944];
+        output->midLayerFeatures = new float[4000];
       }
 
       float norm = 0;
@@ -2692,7 +2692,7 @@ void NeuralNet::getOutput(
         midLayerFeatureOutput[(row * midLayerFeatureSize + i)] /= norm;
       }
 
-      FeatureHashing(midLayerFeatureOutput + (row * midLayerFeatureSize), output->midLayerFeatures, 15552, 1944);
+      FeatureHashing(midLayerFeatureOutput + (row * midLayerFeatureSize), output->midLayerFeatures, 15552, 4000);
 
     }
 

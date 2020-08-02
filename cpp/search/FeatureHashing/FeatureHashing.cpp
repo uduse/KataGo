@@ -27,6 +27,7 @@ void FeatureHashing(float* bigArray, float* smallArray, int bigDimension, int sm
 	float norm = sqrt(computeDotProduct(smallArray, smallArray, smallDimension));
 	normalizeArray(smallArray, smallDimension, norm);
 }
+
 /*
 
 int main(){

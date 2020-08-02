@@ -8,10 +8,10 @@ MemoryNodeStats::MemoryNodeStats()
 MemoryNodeStats::~MemoryNodeStats()
 {}
 
-Node::Node(Hash128 hash, float* features, int featureSize, MemoryNodeStats stats_){
-	this->hash = hash;
+Node::Node(Hash128 hash_, float* features, int featureSize, MemoryNodeStats stats_){
+	this->hash = hash_;
 	this->featureSize = featureSize;
-	feature = (float*) malloc(featureSize * sizeof(float));
+	this->feature = (float*) malloc(featureSize * sizeof(float));
 	copy(features, features + featureSize, this->feature);
 	this->stats.winProb = stats_.winProb;
 	this->stats.noResultProb = stats_.noResultProb;
@@ -20,6 +20,10 @@ Node::Node(Hash128 hash, float* features, int featureSize, MemoryNodeStats stats
 	this->stats.lead = stats_.lead;
 	this->stats.utility = stats_.utility;
 	this->stats.visits = stats_.visits;
+}
+
+Node::~Node(){
+	// free(this->feature);
 }
 
 void Node::printStats(){

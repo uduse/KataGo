@@ -367,7 +367,6 @@ void NNEvaluator::serve(
         unique_lock<std::mutex> resultLock(resultBuf->resultMutex);
         assert(resultBuf->hasResult == false);
         resultBuf->result = std::make_shared<NNOutput>();
-
         float* policyProbs = resultBuf->result->policyProbs;
         for(int i = 0; i<NNPos::MAX_NN_POLICY_SIZE; i++)
           policyProbs[i] = 0;
@@ -387,9 +386,9 @@ void NNEvaluator::serve(
         resultBuf->result->nnYLen = nnYLen;
         if(resultBuf->includeOwnerMap) {
           float* whiteOwnerMap = new float[nnXLen*nnYLen];
-          float* midLayerFeatures = new float[4000];
+          // float* midLayerFeatures = new float[4000];
           
-          std::fill(midLayerFeatures, midLayerFeatures + 4000, 0.0f);
+          // std::fill(midLayerFeatures, midLayerFeatures + 4000, 0.0f);
           for(int i = 0; i<nnXLen*nnYLen; i++) {
             whiteOwnerMap[i] = 0.0;
           }
@@ -400,11 +399,11 @@ void NNEvaluator::serve(
             }
           }
           resultBuf->result->whiteOwnerMap = whiteOwnerMap;
-          resultBuf->result->midLayerFeatures = midLayerFeatures;
+          // resultBuf->result->midLayerFeatures = midLayerFeatures;
         }
         else {
           resultBuf->result->whiteOwnerMap = NULL;
-          resultBuf->result->midLayerFeatures = NULL;
+          // resultBuf->result->midLayerFeatures = NULL;
         }
 
         //These aren't really probabilities. Win/Loss/NoResult will get softmaxed later
@@ -444,11 +443,11 @@ void NNEvaluator::serve(
       emptyOutput->nnYLen = nnYLen;
       if(buf.resultBufs[row]->includeOwnerMap){
         emptyOutput->whiteOwnerMap = new float[nnXLen*nnYLen];
-        emptyOutput->midLayerFeatures = new float[4000];
+        // emptyOutput->midLayerFeatures = new float[4000];
       }
       else{
         emptyOutput->whiteOwnerMap = NULL;
-        emptyOutput->midLayerFeatures = NULL;
+        // emptyOutput->midLayerFeatures = NULL;
       }
       outputBuf.push_back(emptyOutput);
     }

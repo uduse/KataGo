@@ -21,6 +21,7 @@ public:
 	vector<Node> memArray;
 
 	Memory(int featureDim, int memorySize_, int numNeighbors_);
+	~Memory();
 
 	void update(Hash128 hash, float* featureVector, MemoryNodeStats stats);	
 

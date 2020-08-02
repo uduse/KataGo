@@ -9,6 +9,10 @@ Memory::Memory(int featureDim, int memorySize_, int numNeighbors_){
 	this->tau = 0.1;
 }
 
+Memory::~Memory(){
+	this->memArray.clear();
+}
+
 void Memory::setTau(double tau_){
 	this->tau = tau_;
 }

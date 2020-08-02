@@ -2584,13 +2584,6 @@ void NeuralNet::getOutput(
   );
   CHECK_ERR(err);
 
-/*
-  for(int i=0;i<midLayerFeatureSize;i++){
-    cout << midLayerFeatures[i] << " ";
-  }
-  cout << endl;
-*/
-
   err = clEnqueueReadBuffer(
     handle->commandQueue, buffers->policyPass, blocking, 0, inputBuffers->singlePolicyPassResultBytes*batchSize, inputBuffers->policyPassResults, 0, NULL, NULL
   );
@@ -2683,9 +2676,7 @@ void NeuralNet::getOutput(
       float norm = 0;
       for(int i=0;i<midLayerFeatureSize;i++){
         norm += pow(midLayerFeatureOutput[(row * midLayerFeatureSize + i)], 2.0);
-        // norm += midLayerFeatureOutput[(row * midLayerFeatureSize + i)] * midLayerFeatureOutput[(row * midLayerFeatureSize + i)];
       }
-
       norm = sqrt(norm);
 
       for(int i=0;i<midLayerFeatureSize;i++){

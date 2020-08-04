@@ -18,7 +18,7 @@ public:
 	int featureDimension;
 	int memorySize;
 	int numNeighbors;
-	vector<Node> memArray;
+	vector<Node*> memArray;
 
 	Memory(int featureDim, int memorySize_, int numNeighbors_);
 	~Memory();

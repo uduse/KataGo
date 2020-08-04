@@ -45,24 +45,24 @@ void Memory::printMemory(){
 
 	for(int i=0;i<memArray.size();i++){
 		cout << "Entry: " << (i+1) << endl;
-		memArray[i].printStats();
+		memArray[i]->printStats();
 	}
 }
 
 void Memory::update(Hash128 hash, float* featureVector, MemoryNodeStats stats){
-	Node newNode(hash, featureVector, this->featureDimension, stats);
+	Node* newNode = new Node(hash, featureVector, this->featureDimension, stats);
 	if(memArray.size() < this->memorySize){
 		for(int i=0;i<memArray.size();i++){
-			if(memArray[i].hash == hash){
-				int existingVisits = memArray[i].stats.visits;
-				int newVisits = newNode.stats.visits;
-				newNode.stats.visits += memArray[i].stats.visits;
-				newNode.stats.winProb = memArray[i].stats.winProb + ((newNode.stats.winProb - memArray[i].stats.winProb) / newNode.stats.visits);
-				newNode.stats.noResultProb = memArray[i].stats.noResultProb + ((newNode.stats.noResultProb - memArray[i].stats.noResultProb) / newNode.stats.visits);
-				newNode.stats.scoreMean = memArray[i].stats.scoreMean + ((newNode.stats.scoreMean - memArray[i].stats.scoreMean) / newNode.stats.visits);
-				newNode.stats.scoreMeanSq = memArray[i].stats.scoreMeanSq + ((newNode.stats.scoreMeanSq - memArray[i].stats.scoreMeanSq) / newNode.stats.visits);
-				newNode.stats.lead = memArray[i].stats.lead + ((newNode.stats.lead - memArray[i].stats.lead) / newNode.stats.visits);
-				newNode.stats.utility = memArray[i].stats.utility + ((newNode.stats.utility - memArray[i].stats.utility) / newNode.stats.visits);
+			if(memArray[i]->hash == hash){
+				int existingVisits = memArray[i]->stats.visits;
+				int newVisits = newNode->stats.visits;
+				newNode->stats.visits += memArray[i]->stats.visits;
+				newNode->stats.winProb = memArray[i]->stats.winProb + ((newNode->stats.winProb - memArray[i]->stats.winProb) / newNode->stats.visits);
+				newNode->stats.noResultProb = memArray[i]->stats.noResultProb + ((newNode->stats.noResultProb - memArray[i]->stats.noResultProb) / newNode->stats.visits);
+				newNode->stats.scoreMean = memArray[i]->stats.scoreMean + ((newNode->stats.scoreMean - memArray[i]->stats.scoreMean) / newNode->stats.visits);
+				newNode->stats.scoreMeanSq = memArray[i]->stats.scoreMeanSq + ((newNode->stats.scoreMeanSq - memArray[i]->stats.scoreMeanSq) / newNode->stats.visits);
+				newNode->stats.lead = memArray[i]->stats.lead + ((newNode->stats.lead - memArray[i]->stats.lead) / newNode->stats.visits);
+				newNode->stats.utility = memArray[i]->stats.utility + ((newNode->stats.utility - memArray[i]->stats.utility) / newNode->stats.visits);
 
 				memArray.erase(memArray.begin()+i);
 				break;
@@ -74,17 +74,17 @@ void Memory::update(Hash128 hash, float* featureVector, MemoryNodeStats stats){
 	else{
 		bool isPresent = false;
 		for(int i=0; i < this->memorySize; i++){
-			if(memArray[i].hash == hash){
+			if(memArray[i]->hash == hash){
 				isPresent = true;
-				int existingVisits = memArray[i].stats.visits;
-				int newVisits = newNode.stats.visits;
-				newNode.stats.visits += memArray[i].stats.visits;
-				newNode.stats.winProb = memArray[i].stats.winProb + ((newNode.stats.winProb - memArray[i].stats.winProb) / newNode.stats.visits);
-				newNode.stats.noResultProb = memArray[i].stats.noResultProb + ((newNode.stats.noResultProb - memArray[i].stats.noResultProb) / newNode.stats.visits);
-				newNode.stats.scoreMean = memArray[i].stats.scoreMean + ((newNode.stats.scoreMean - memArray[i].stats.scoreMean) / newNode.stats.visits);
-				newNode.stats.scoreMeanSq = memArray[i].stats.scoreMeanSq + ((newNode.stats.scoreMeanSq - memArray[i].stats.scoreMeanSq) / newNode.stats.visits);
-				newNode.stats.lead = memArray[i].stats.lead + ((newNode.stats.lead - memArray[i].stats.lead) / newNode.stats.visits);
-				newNode.stats.utility = memArray[i].stats.utility + ((newNode.stats.utility - memArray[i].stats.utility) / newNode.stats.visits);
+				int existingVisits = memArray[i]->stats.visits;
+				int newVisits = newNode->stats.visits;
+				newNode->stats.visits += memArray[i]->stats.visits;
+				newNode->stats.winProb = memArray[i]->stats.winProb + ((newNode->stats.winProb - memArray[i]->stats.winProb) / newNode->stats.visits);
+				newNode->stats.noResultProb = memArray[i]->stats.noResultProb + ((newNode->stats.noResultProb - memArray[i]->stats.noResultProb) / newNode->stats.visits);
+				newNode->stats.scoreMean = memArray[i]->stats.scoreMean + ((newNode->stats.scoreMean - memArray[i]->stats.scoreMean) / newNode->stats.visits);
+				newNode->stats.scoreMeanSq = memArray[i]->stats.scoreMeanSq + ((newNode->stats.scoreMeanSq - memArray[i]->stats.scoreMeanSq) / newNode->stats.visits);
+				newNode->stats.lead = memArray[i]->stats.lead + ((newNode->stats.lead - memArray[i]->stats.lead) / newNode->stats.visits);
+				newNode->stats.utility = memArray[i]->stats.utility + ((newNode->stats.utility - memArray[i]->stats.utility) / newNode->stats.visits);
 
 				memArray.erase(memArray.begin()+i);
 				break;
@@ -102,7 +102,7 @@ MemoryNodeStats Memory::query(float* featureVector){
 	priority_queue<pair<double, int> > top_neighbours;
 	double similarity;
 	for(int i=0;i<memArray.size();i++){
-		similarity = cosine_similarity(featureVector, memArray[i].feature, this->featureDimension);
+		similarity = cosine_similarity(featureVector, memArray[i]->feature, this->featureDimension);
 		// cout << similarity << endl;
 		
 		// cout << getNorm(featureVector, this->featureDimension) << " " << getNorm(memArray[i].feature, featureDimension) << endl;
@@ -166,17 +166,17 @@ MemoryNodeStats Memory::query(float* featureVector){
 
 		if(this->aggregator == weighted_softmax){
 			// cout << memArray[index].stats.visits << endl;
-			weight = memArray[index].stats.visits * exp(-(1 + result.first)/this->tau);
+			weight = memArray[index]->stats.visits * exp(-(1 + result.first)/this->tau);
 			weightSum += weight;
 		}
 
-		stats.winProb += weight * memArray[index].stats.winProb;
-		stats.noResultProb += weight * memArray[index].stats.noResultProb;
-		stats.scoreMean += weight * memArray[index].stats.scoreMean;
-		stats.scoreMeanSq += weight * memArray[index].stats.scoreMeanSq;
-		stats.lead += weight * memArray[index].stats.lead;
-		stats.utility += weight * memArray[index].stats.utility;
-		stats.visits += weight * memArray[index].stats.visits;
+		stats.winProb += weight * memArray[index]->stats.winProb;
+		stats.noResultProb += weight * memArray[index]->stats.noResultProb;
+		stats.scoreMean += weight * memArray[index]->stats.scoreMean;
+		stats.scoreMeanSq += weight * memArray[index]->stats.scoreMeanSq;
+		stats.lead += weight * memArray[index]->stats.lead;
+		stats.utility += weight * memArray[index]->stats.utility;
+		stats.visits += weight * memArray[index]->stats.visits;
 	}
 
 	stats.winProb /= weightSum;

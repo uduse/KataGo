@@ -1,0 +1,94 @@
+2020-08-03 02:25:53+0530: Engine starting...
+2020-08-03 02:25:53+0530: nnRandSeed0 = 2820304437820054515
+2020-08-03 02:25:53+0530: After dedups: nnModelFile0 = models/g170e-b15c192-s1672170752-d466197061.txt.gz useFP16 auto useNHWC auto
+2020-08-03 02:26:54+0530: Engine starting...
+2020-08-03 02:26:54+0530: nnRandSeed0 = 723157702907802734
+2020-08-03 02:26:54+0530: After dedups: nnModelFile0 = models/g170e-b15c192-s1672170752-d466197061.txt.gz useFP16 auto useNHWC auto
+2020-08-03 02:26:57+0530: Found OpenCL Platform 0: Intel(R) OpenCL (Intel(R) Corporation) (OpenCL 2.0 )
+2020-08-03 02:26:57+0530: Found 2 device(s) on platform 0 with type CPU or GPU or Accelerator
+2020-08-03 02:26:57+0530: Found OpenCL Platform 1: NVIDIA CUDA (NVIDIA Corporation) (OpenCL 1.2 CUDA 10.2.141)
+2020-08-03 02:26:57+0530: Found 1 device(s) on platform 1 with type CPU or GPU or Accelerator
+2020-08-03 02:26:57+0530: Found OpenCL Device 0: Intel(R) HD Graphics (Intel(R) Corporation) (score 6000200)
+2020-08-03 02:26:57+0530: Found OpenCL Device 1: Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz (Intel(R) Corporation) (score 200)
+2020-08-03 02:26:57+0530: Found OpenCL Device 2: GeForce 940MX (NVIDIA Corporation) (score 11000102)
+2020-08-03 02:26:57+0530: Using OpenCL Device 2: GeForce 940MX (NVIDIA Corporation) OpenCL 1.2 CUDA
+2020-08-03 02:26:57+0530: Loaded tuning parameters from: /home/stark/.katago/opencltuning/tune6_gpuGeForce940MX_x19_y19_c192_mv8.txt
+2020-08-03 02:26:57+0530: Loaded neural net
+2020-08-03 02:26:57+0530: OpenCL backend: Model version 8
+2020-08-03 02:26:57+0530: OpenCL backend: Model name: b15c192-s1672170752-d466197061
+2020-08-03 02:28:16+0530: Engine starting...
+2020-08-03 02:28:16+0530: nnRandSeed0 = 6687191633265748269
+2020-08-03 02:28:16+0530: After dedups: nnModelFile0 = models/g170e-b15c192-s1672170752-d466197061.txt.gz useFP16 auto useNHWC auto
+2020-08-03 02:28:19+0530: Found OpenCL Platform 0: Intel(R) OpenCL (Intel(R) Corporation) (OpenCL 2.0 )
+2020-08-03 02:28:19+0530: Found 2 device(s) on platform 0 with type CPU or GPU or Accelerator
+2020-08-03 02:28:19+0530: Found OpenCL Platform 1: NVIDIA CUDA (NVIDIA Corporation) (OpenCL 1.2 CUDA 10.2.141)
+2020-08-03 02:28:19+0530: Found 1 device(s) on platform 1 with type CPU or GPU or Accelerator
+2020-08-03 02:28:19+0530: Found OpenCL Device 0: Intel(R) HD Graphics (Intel(R) Corporation) (score 6000200)
+2020-08-03 02:28:19+0530: Found OpenCL Device 1: Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz (Intel(R) Corporation) (score 200)
+2020-08-03 02:28:19+0530: Found OpenCL Device 2: GeForce 940MX (NVIDIA Corporation) (score 11000102)
+2020-08-03 02:28:19+0530: Using OpenCL Device 2: GeForce 940MX (NVIDIA Corporation) OpenCL 1.2 CUDA
+2020-08-03 02:28:19+0530: Loaded tuning parameters from: /home/stark/.katago/opencltuning/tune6_gpuGeForce940MX_x19_y19_c192_mv8.txt
+2020-08-03 02:28:19+0530: Loaded neural net
+2020-08-03 02:28:19+0530: WARNING: Unused key 'logDir' in configs/analysis_example.cfg
+2020-08-03 02:28:19+0530: WARNING: Unused key 'reportAnalysisWinratesAs' in configs/analysis_example.cfg
+2020-08-03 02:28:19+0530: OpenCL backend: Model version 8
+2020-08-03 02:28:19+0530: OpenCL backend: Model name: b15c192-s1672170752-d466197061
+2020-08-03 02:28:19+0530: Loaded all config stuff, starting demo
+2020-08-03 02:29:10+0530: Engine starting...
+2020-08-03 02:29:10+0530: nnRandSeed0 = 10922647614905941886
+2020-08-03 02:29:10+0530: After dedups: nnModelFile0 = models/g170e-b15c192-s1672170752-d466197061.txt.gz useFP16 auto useNHWC auto
+2020-08-03 02:30:02+0530: Found OpenCL Platform 0: Intel(R) OpenCL (Intel(R) Corporation) (OpenCL 2.0 )
+2020-08-03 02:30:02+0530: Found 2 device(s) on platform 0 with type CPU or GPU or Accelerator
+2020-08-03 02:30:02+0530: Found OpenCL Platform 1: NVIDIA CUDA (NVIDIA Corporation) (OpenCL 1.2 CUDA 10.2.141)
+2020-08-03 02:30:02+0530: Found 1 device(s) on platform 1 with type CPU or GPU or Accelerator
+2020-08-03 02:30:02+0530: Found OpenCL Device 0: Intel(R) HD Graphics (Intel(R) Corporation) (score 6000200)
+2020-08-03 02:30:02+0530: Found OpenCL Device 1: Intel(R) Core(TM) i7-4910MQ CPU @ 2.90GHz (Intel(R) Corporation) (score 102)
+2020-08-03 02:30:02+0530: Found OpenCL Device 2: GeForce 940MX (NVIDIA Corporation) (score 11000102)
+2020-08-03 02:30:03+0530: Using OpenCL Device 2: GeForce 940MX (NVIDIA Corporation) OpenCL 1.2 CUDA
+2020-08-03 02:30:03+0530: Loaded tuning parameters from: /home/stark/.katago/opencltuning/tune6_gpuGeForce940MX_x19_y19_c192_mv8.txt
+2020-08-03 02:30:03+0530: OpenCL backend: Model version 8
+2020-08-03 02:30:03+0530: OpenCL backend: Model name: b15c192-s1672170752-d466197061
+2020-08-03 02:30:03+0530: Loaded neural net
+2020-08-03 02:30:04+0530: WARNING: Unused key 'logDir' in configs/analysis_example.cfg
+2020-08-03 02:30:06+0530: WARNING: Unused key 'reportAnalysisWinratesAs' in configs/analysis_example.cfg
+2020-08-03 02:30:06+0530: Loaded all config stuff, starting demo
+2020-08-03 03:26:32+0530: Engine starting...
+2020-08-03 03:26:32+0530: nnRandSeed0 = 12225631884399442099
+2020-08-03 03:26:32+0530: After dedups: nnModelFile0 = models/g170e-b15c192-s1672170752-d466197061.txt.gz useFP16 auto useNHWC auto
+2020-08-03 03:27:48+0530: Found OpenCL Platform 0: Intel(R) OpenCL (Intel(R) Corporation) (OpenCL 2.0 )
+2020-08-03 03:27:48+0530: Found 2 device(s) on platform 0 with type CPU or GPU or Accelerator
+2020-08-03 03:27:48+0530: Found OpenCL Platform 1: NVIDIA CUDA (NVIDIA Corporation) (OpenCL 1.2 CUDA 10.2.141)
+2020-08-03 03:27:48+0530: Found 1 device(s) on platform 1 with type CPU or GPU or Accelerator
+2020-08-03 03:27:48+0530: Found OpenCL Device 0: Intel(R) HD Graphics (Intel(R) Corporation) (score 6000200)
+2020-08-03 03:27:48+0530: Found OpenCL Device 1: Intel(R) Core(TM) i7-4910MQ CPU @ 2.90GHz (Intel(R) Corporation) (score 102)
+2020-08-03 03:27:48+0530: Found OpenCL Device 2: GeForce 940MX (NVIDIA Corporation) (score 11000102)
+2020-08-03 03:27:49+0530: Using OpenCL Device 2: GeForce 940MX (NVIDIA Corporation) OpenCL 1.2 CUDA
+2020-08-03 03:27:49+0530: Loaded tuning parameters from: /home/stark/.katago/opencltuning/tune6_gpuGeForce940MX_x19_y19_c192_mv8.txt
+2020-08-03 03:27:50+0530: Loaded neural net
+2020-08-03 03:27:50+0530: WARNING: Unused key 'defaultBoardSize' in configs/analysis_example.cfg
+2020-08-03 03:27:50+0530: WARNING: Unused key 'logDir' in configs/analysis_example.cfg
+2020-08-03 03:27:50+0530: WARNING: Unused key 'reportAnalysisWinratesAs' in configs/analysis_example.cfg
+2020-08-03 03:27:50+0530: Loaded all config stuff, starting demo
+2020-08-03 03:27:50+0530: OpenCL backend: Model version 8
+2020-08-03 03:27:50+0530: OpenCL backend: Model name: b15c192-s1672170752-d466197061
+2020-08-03 03:35:50+0530: Engine starting...
+2020-08-03 03:35:50+0530: nnRandSeed0 = 5125179284153695558
+2020-08-03 03:42:30+0530: Engine starting...
+2020-08-03 03:42:30+0530: nnRandSeed0 = 6857943133692399897
+2020-08-03 03:42:30+0530: After dedups: nnModelFile0 = models/g170e-b15c192-s1672170752-d466197061.txt.gz useFP16 auto useNHWC auto
+2020-08-03 03:43:36+0530: Found OpenCL Platform 0: Intel(R) OpenCL (Intel(R) Corporation) (OpenCL 2.0 )
+2020-08-03 03:43:36+0530: Found 2 device(s) on platform 0 with type CPU or GPU or Accelerator
+2020-08-03 03:43:36+0530: Found OpenCL Platform 1: NVIDIA CUDA (NVIDIA Corporation) (OpenCL 1.2 CUDA 10.2.141)
+2020-08-03 03:43:36+0530: Found 1 device(s) on platform 1 with type CPU or GPU or Accelerator
+2020-08-03 03:43:36+0530: Found OpenCL Device 0: Intel(R) HD Graphics (Intel(R) Corporation) (score 6000200)
+2020-08-03 03:43:36+0530: Found OpenCL Device 1: Intel(R) Core(TM) i7-4910MQ CPU @ 2.90GHz (Intel(R) Corporation) (score 102)
+2020-08-03 03:43:36+0530: Found OpenCL Device 2: GeForce 940MX (NVIDIA Corporation) (score 11000102)
+2020-08-03 03:43:38+0530: Using OpenCL Device 2: GeForce 940MX (NVIDIA Corporation) OpenCL 1.2 CUDA
+2020-08-03 03:43:38+0530: Loaded tuning parameters from: /home/stark/.katago/opencltuning/tune6_gpuGeForce940MX_x19_y19_c192_mv8.txt
+2020-08-03 03:43:39+0530: Loaded neural net
+2020-08-03 03:43:39+0530: WARNING: Unused key 'defaultBoardSize' in configs/analysis_example.cfg
+2020-08-03 03:43:39+0530: WARNING: Unused key 'logDir' in configs/analysis_example.cfg
+2020-08-03 03:43:39+0530: OpenCL backend: Model version 8
+2020-08-03 03:43:39+0530: OpenCL backend: Model name: b15c192-s1672170752-d466197061
+2020-08-03 03:43:39+0530: WARNING: Unused key 'reportAnalysisWinratesAs' in configs/analysis_example.cfg
+2020-08-03 03:43:39+0530: Loaded all config stuff, starting demo

@@ -64,6 +64,10 @@ void Memory::update(Hash128 hash, float* featureVector, MemoryNodeStats stats){
 				newNode->stats.lead = memArray[i]->stats.lead + ((newNode->stats.lead - memArray[i]->stats.lead) / newNode->stats.visits);
 				newNode->stats.utility = memArray[i]->stats.utility + ((newNode->stats.utility - memArray[i]->stats.utility) / newNode->stats.visits);
 
+				if(memArray[i]->feature != NULL){
+					free(memArray[i]->feature);
+					memArray[i]->feature = NULL;
+				}
 				memArray.erase(memArray.begin()+i);
 				break;
 			}
@@ -85,12 +89,19 @@ void Memory::update(Hash128 hash, float* featureVector, MemoryNodeStats stats){
 				newNode->stats.scoreMeanSq = memArray[i]->stats.scoreMeanSq + ((newNode->stats.scoreMeanSq - memArray[i]->stats.scoreMeanSq) / newNode->stats.visits);
 				newNode->stats.lead = memArray[i]->stats.lead + ((newNode->stats.lead - memArray[i]->stats.lead) / newNode->stats.visits);
 				newNode->stats.utility = memArray[i]->stats.utility + ((newNode->stats.utility - memArray[i]->stats.utility) / newNode->stats.visits);
-
+				if(memArray[i]->feature != NULL){
+					free(memArray[i]->feature);
+					memArray[i]->feature = NULL;
+				}
 				memArray.erase(memArray.begin()+i);
 				break;
 			}
 		}
 		if(!isPresent){
+			if(memArray[0]->feature != NULL){
+				free(memArray[0]->feature);
+				memArray[0]->feature = NULL;
+			}	
 			memArray.erase(memArray.begin());
 		}
 		memArray.push_back(newNode);

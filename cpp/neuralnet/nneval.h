@@ -113,6 +113,7 @@ class NNEvaluator {
   int getNNYLen() const;
   enabled_t getUsingFP16Mode() const;
   enabled_t getUsingNHWCMode() const;
+  void setFeatureDim(const int featureDim_);
 
   //Return the "nearest" supported ruleset to desiredRules by this model.
   //Fills supported with true if desiredRules itself was exactly supported, false if some modifications had to be made.
@@ -173,6 +174,7 @@ class NNEvaluator {
   const std::vector<int> gpuIdxByServerThread;
   const std::string randSeed;
   const bool debugSkipNeuralNet;
+  int featureDim;
 
   ComputeContext* computeContext;
   LoadedModel* loadedModel;

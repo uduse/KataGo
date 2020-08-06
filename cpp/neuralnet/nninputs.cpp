@@ -321,17 +321,6 @@ NNOutput::NNOutput(const NNOutput& other) {
     whiteOwnerMap = NULL;
   }
 
-
-  // if(other.midLayerFeatures != NULL) {
-  //   cout << "Is it even coming here?" << endl;
-  //   midLayerFeatures = new float[4000];
-  //   std::copy(other.midLayerFeatures, other.midLayerFeatures + 4000, midLayerFeatures);
-  // }
-  // else{
-  //   midLayerFeatures = NULL;
-  // }
-
-
   if(other.noisedPolicyProbs != NULL) {
     noisedPolicyProbs = new float[NNPos::MAX_NN_POLICY_SIZE];
     std::copy(other.noisedPolicyProbs, other.noisedPolicyProbs + NNPos::MAX_NN_POLICY_SIZE, noisedPolicyProbs);
@@ -397,16 +386,6 @@ NNOutput::NNOutput(const vector<shared_ptr<NNOutput>>& others) {
           whiteOwnerMap[pos] += other.whiteOwnerMap[pos];
         }
       }
-
-      // if(other.midLayerFeatures != NULL) {
-      //   if(midLayerFeatures == NULL) {
-      //     midLayerFeatures = new float[4000];
-      //     std::fill(midLayerFeatures, midLayerFeatures + 4000, 0.0f);
-      //   }
-      //   for(int pos = 0; pos<4000; pos++){
-      //     midLayerFeatures[pos] += other.midLayerFeatures[pos];
-      //   }
-      // }
     }
 
     if(whiteOwnerMap != NULL) {
@@ -474,14 +453,6 @@ NNOutput& NNOutput::operator=(const NNOutput& other) {
   else{
     whiteOwnerMap = NULL;
   }
-
-  // if(other.midLayerFeatures != NULL) {
-  //   midLayerFeatures = new float[4000];
-  //   std::copy(other.midLayerFeatures, other.midLayerFeatures + 4000, midLayerFeatures);
-  // }
-  // else{
-  //   midLayerFeatures = NULL;
-  // }
 
   if(noisedPolicyProbs != NULL)
     delete[] noisedPolicyProbs;

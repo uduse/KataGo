@@ -123,6 +123,7 @@ namespace NeuralNet {
   // into the NNOutput structs.
   // All outputs are in logits - all final activation functions softmax, tanh, etc. are NOT applied.
   void getOutput(ComputeHandle* computeHandle, InputBuffers* buffers, int numBatchEltsFilled, std::vector<NNOutput*>& outputs);
+  void getOutput(ComputeHandle* computeHandle, InputBuffers* buffers, int numBatchEltsFilled, std::vector<NNOutput*>& outputs, int featureDim);
 
 
   //FOR TESTING -----------------------------------------------------------------------

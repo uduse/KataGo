@@ -58,13 +58,14 @@ SearchParams::SearchParams()
    lagBuffer(0.0),
    searchFactorAfterOnePass(1.0),
    searchFactorAfterTwoPass(1.0),
-   memorySize(2000),
-   memoryNumNeighbors(8),
-   memoryLambda(0.05),
+   memorySize(3000),
+   memoryNumNeighbors(48),
+   memoryLambda(0.2),
    memoryUpdateSchema(0),
-   tau(0.02),
+   tau(0.2),
    aggregator(1),
-   gamma(0.9)
+   gamma(0.9),
+   featureDim(2000)
 {}
 
 SearchParams::~SearchParams()

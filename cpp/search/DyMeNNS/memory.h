@@ -23,7 +23,7 @@ public:
 	Memory(int featureDim, int memorySize_, int numNeighbors_);
 	~Memory();
 
-	void update(Hash128 hash, float* featureVector, MemoryNodeStats stats);	
+	void update(Hash128 hash, float* featureVector, MemoryNodeStats* stats);	
 
 	MemoryNodeStats query(float* featureVector);
 

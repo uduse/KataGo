@@ -240,6 +240,14 @@ vector<NNEvaluator*> Setup::initializeNNEvaluators(
 
     int defaultSymmetry = forcedSymmetry >= 0 ? forcedSymmetry : 0;
 
+    int featureDim;
+    if (cfg.contains("featureDim")) {
+      featureDim = cfg.getUInt64("featureDim", (uint64_t) 100, (uint64_t) 65535);
+    }
+    else{
+      featureDim = 2000; //Default Value
+    }
+
     NNEvaluator* nnEval = new NNEvaluator(
       nnModelName,
       nnModelFile,
@@ -263,6 +271,8 @@ vector<NNEvaluator*> Setup::initializeNNEvaluators(
       (forcedSymmetry >= 0 ? false : nnRandomize),
       defaultSymmetry
     );
+
+    nnEval->setFeatureDim(featureDim);
 
     nnEval->spawnServerThreads();
 
@@ -325,6 +335,13 @@ vector<SearchParams> Setup::loadParams(
 
     if (cfg.contains("gamma")) {
       params.gamma = cfg.getDouble("gamma", (double) 0.7, (double) 1);
+    }
+
+    if (cfg.contains("featureDim")) {
+      params.featureDim = cfg.getUInt64("featureDim", (uint64_t) 100, (uint64_t) 65535);
+    }
+    else{
+      params.featureDim = 2000;
     }
 
     if (cfg.contains("memoryNumNeighbors")) {

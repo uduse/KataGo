@@ -243,6 +243,13 @@ Rules NNEvaluator::getSupportedRules(const Rules& desiredRules, bool& supported)
   return NeuralNet::getSupportedRules(loadedModel, desiredRules, supported);
 }
 
+
+void NNEvaluator::setFeatureDim(const int featureDim_){
+  this->featureDim = featureDim_;
+}
+
+
+
 uint64_t NNEvaluator::numRowsProcessed() const {
   return m_numRowsProcessed.load(std::memory_order_relaxed);
 }
@@ -386,9 +393,7 @@ void NNEvaluator::serve(
         resultBuf->result->nnYLen = nnYLen;
         if(resultBuf->includeOwnerMap) {
           float* whiteOwnerMap = new float[nnXLen*nnYLen];
-          // float* midLayerFeatures = new float[4000];
-          
-          // std::fill(midLayerFeatures, midLayerFeatures + 4000, 0.0f);
+
           for(int i = 0; i<nnXLen*nnYLen; i++) {
             whiteOwnerMap[i] = 0.0;
           }
@@ -399,11 +404,9 @@ void NNEvaluator::serve(
             }
           }
           resultBuf->result->whiteOwnerMap = whiteOwnerMap;
-          // resultBuf->result->midLayerFeatures = midLayerFeatures;
         }
         else {
           resultBuf->result->whiteOwnerMap = NULL;
-          // resultBuf->result->midLayerFeatures = NULL;
         }
 
         //These aren't really probabilities. Win/Loss/NoResult will get softmaxed later
@@ -443,11 +446,9 @@ void NNEvaluator::serve(
       emptyOutput->nnYLen = nnYLen;
       if(buf.resultBufs[row]->includeOwnerMap){
         emptyOutput->whiteOwnerMap = new float[nnXLen*nnYLen];
-        // emptyOutput->midLayerFeatures = new float[4000];
       }
       else{
         emptyOutput->whiteOwnerMap = NULL;
-        // emptyOutput->midLayerFeatures = NULL;
       }
       outputBuf.push_back(emptyOutput);
     }
@@ -469,7 +470,8 @@ void NNEvaluator::serve(
       std::copy(rowGlobal,rowGlobal+rowGlobalLen,rowGlobalInput);
     }
 
-    NeuralNet::getOutput(gpuHandle, buf.inputBuffers, numRows, outputBuf);
+    // NeuralNet::getOutput(gpuHandle, buf.inputBuffers, numRows, outputBuf);
+    NeuralNet::getOutput(gpuHandle, buf.inputBuffers, numRows, outputBuf, this->featureDim);
     assert(outputBuf.size() == numRows);
 
     m_numRowsProcessed.fetch_add(numRows, std::memory_order_relaxed);

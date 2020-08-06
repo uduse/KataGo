@@ -2682,8 +2682,8 @@ void NeuralNet::getOutput(
       for(int i=0;i<midLayerFeatureSize;i++){
         midLayerFeatureOutput[(row * midLayerFeatureSize + i)] /= norm;
       }
-
-      FeatureHashing(midLayerFeatureOutput + (row * midLayerFeatureSize), output->midLayerFeatures, 15552, 4000);
+      
+      FeatureHashing(midLayerFeatureOutput + (row * midLayerFeatureSize), output->midLayerFeatures, midLayerFeatureSize, 4000);
 
     }
 
@@ -2719,7 +2719,249 @@ void NeuralNet::getOutput(
   delete[] midLayerFeatureOutput;
 }
 
+void NeuralNet::getOutput(
+  ComputeHandle* gpuHandle,
+  InputBuffers* inputBuffers,
+  int numBatchEltsFilled,
+  vector<NNOutput*>& outputs,
+  int featureDim
+) {
 
+  assert(numBatchEltsFilled <= inputBuffers->maxBatchSize);
+  assert(numBatchEltsFilled > 0);
+  int batchSize = numBatchEltsFilled;
+  int nnXLen = gpuHandle->nnXLen;
+  int nnYLen = gpuHandle->nnYLen;
+  int version = gpuHandle->model->version;
+  Buffers* buffers = gpuHandle->buffers;
+
+  assert(inputBuffers->userInputBufferElts == buffers->inputElts);
+  assert(inputBuffers->userInputGlobalBufferElts == buffers->inputGlobalElts);
+  assert(inputBuffers->policyResultBufferElts == buffers->policyElts);
+  assert(inputBuffers->valueResultBufferElts == buffers->valueElts);
+  assert(inputBuffers->singleInputBytes == inputBuffers->singleInputElts*4);
+  assert(inputBuffers->singleInputGlobalBytes == inputBuffers->singleInputGlobalElts*4);
+  assert(inputBuffers->singlePolicyResultElts + inputBuffers->singlePolicyPassResultElts == gpuHandle->policySize);
+  assert(inputBuffers->singlePolicyResultBytes + inputBuffers->singlePolicyPassResultBytes == gpuHandle->policySize * sizeof(float));
+  assert(inputBuffers->scoreValueResultBufferElts == buffers->scoreValueElts);
+  assert(inputBuffers->ownershipResultBufferElts == buffers->ownershipElts);
+  assert(inputBuffers->singleOwnershipResultElts == nnXLen*nnYLen);
+  assert(inputBuffers->singleOwnershipResultBytes == nnXLen*nnYLen * sizeof(float));
+
+  ComputeHandleInternal* handle = gpuHandle->handle;
+
+  cl_int err;
+  err = clEnqueueWriteBuffer(
+    handle->commandQueue,
+    buffers->input,
+    CL_FALSE,
+    0,
+    inputBuffers->singleInputBytes*batchSize,
+    inputBuffers->userInputBuffer,
+    0,
+    NULL,
+    NULL
+  );
+  CHECK_ERR(err);
+  err = clEnqueueWriteBuffer(
+    handle->commandQueue,
+    buffers->inputGlobal,
+    CL_FALSE,
+    0,
+    inputBuffers->singleInputGlobalBytes*batchSize,
+    inputBuffers->userInputGlobalBuffer,
+    0,
+    NULL,
+    NULL
+  );
+  CHECK_ERR(err);
+
+  gpuHandle->model->apply(
+    handle,
+    batchSize,
+    inputBuffers->symmetriesBuffer,
+
+    buffers->input,
+    buffers->inputScratch,
+    buffers->inputGlobal,
+
+    buffers->mask,
+    buffers->maskSum,
+
+    buffers->trunk,
+    buffers->trunkScratch,
+    buffers->mid,
+    buffers->midScratch,
+    buffers->gpoolOut,
+    buffers->gpoolOut2,
+    buffers->gpoolConcat,
+    buffers->gpoolBias,
+
+    buffers->p1Out,
+    buffers->p1Out2,
+    buffers->p2Out,
+    buffers->policyPass,
+    buffers->policy,
+
+    buffers->v1Out,
+    buffers->v1Out2,
+    buffers->v1Mean,
+    buffers->v2Out,
+    buffers->value,
+    buffers->scoreValue,
+    buffers->ownership,
+    buffers->ownershipScratch,
+
+    buffers->convWorkspace,
+    buffers->convWorkspace2
+  );
+
+
+  // cout << gpuHandle->model->trunk->trunkNumChannels << endl;
+  int midLayerFeatureSize = gpuHandle->model->trunk->trunkNumChannels * nnXLen * nnYLen;
+  float* midLayerFeatureOutput = new float[midLayerFeatureSize * batchSize];
+
+  cl_bool blocking = CL_TRUE;
+
+  err = clEnqueueReadBuffer(
+    handle->commandQueue, buffers->trunk, blocking, 0, midLayerFeatureSize*batchSize*sizeof(float), midLayerFeatureOutput, 0, NULL, NULL
+  );
+  CHECK_ERR(err);
+
+  err = clEnqueueReadBuffer(
+    handle->commandQueue, buffers->policyPass, blocking, 0, inputBuffers->singlePolicyPassResultBytes*batchSize, inputBuffers->policyPassResults, 0, NULL, NULL
+  );
+  CHECK_ERR(err);
+  err = clEnqueueReadBuffer(
+    handle->commandQueue, buffers->policy, blocking, 0, inputBuffers->singlePolicyResultBytes*batchSize, inputBuffers->policyResults, 0, NULL, NULL
+  );
+  CHECK_ERR(err);
+  err = clEnqueueReadBuffer(
+    handle->commandQueue, buffers->value, blocking, 0, inputBuffers->singleValueResultBytes*batchSize, inputBuffers->valueResults, 0, NULL, NULL
+  );
+  CHECK_ERR(err);
+  err = clEnqueueReadBuffer(
+    handle->commandQueue, buffers->scoreValue, blocking, 0, inputBuffers->singleScoreValueResultBytes*batchSize, inputBuffers->scoreValueResults, 0, NULL, NULL
+  );
+  CHECK_ERR(err);
+  err = clEnqueueReadBuffer(
+    handle->commandQueue, buffers->ownership, blocking, 0, inputBuffers->singleOwnershipResultBytes*batchSize, inputBuffers->ownershipResults, 0, NULL, NULL
+  );
+  CHECK_ERR(err);
+
+  #ifdef PROFILE_KERNELS
+  {
+    cl_int profileErr;
+    profileErr = clWaitForEvents(handle->profileEvents.size(), handle->profileEvents.data());
+    CHECK_ERR(profileErr);
+    for(int i = 0; i<handle->profileCallbacks.size(); i++) {
+      handle->profileCallbacks[i]();
+    }
+    for(int i = 0; i<handle->profileEvents.size(); i++) {
+      clReleaseEvent(handle->profileEvents[i]);
+    }
+    handle->profileEvents.clear();
+    handle->profileCallbacks.clear();
+
+    static int profileResultPrintCounter = 0;
+    profileResultPrintCounter += 1;
+    if(profileResultPrintCounter % 100 == 0) {
+      for(int i = 0; i<handle->profileResultPrinters.size(); i++) {
+        handle->profileResultPrinters[i]();
+      }
+    }
+  }
+  #else
+  assert(handle->profileEvents.size() == 0);
+  assert(handle->profileCallbacks.size() == 0);
+  assert(handle->profileResultPrinters.size() == 0);
+  #endif
+
+  assert(outputs.size() == batchSize);
+
+  for(int row = 0; row < batchSize; row++) {
+    NNOutput* output = outputs[row];
+    assert(output->nnXLen == nnXLen);
+    assert(output->nnYLen == nnYLen);
+
+    float* policyProbs = output->policyProbs;
+
+    //These are not actually correct, the client does the postprocessing to turn them into
+    //policy probabilities and white game outcome probabilities
+    //Also we don't fill in the nnHash here either
+    std::copy(
+      inputBuffers->policyResults + row * inputBuffers->singlePolicyResultElts,
+      inputBuffers->policyResults + (row+1) * inputBuffers->singlePolicyResultElts,
+      policyProbs
+    );
+    policyProbs[inputBuffers->singlePolicyResultElts] = inputBuffers->policyPassResults[row];
+
+    int numValueChannels = gpuHandle->model->numValueChannels;
+    assert(numValueChannels == 3);
+    output->whiteWinProb = inputBuffers->valueResults[row * numValueChannels];
+    output->whiteLossProb = inputBuffers->valueResults[row * numValueChannels + 1];
+    output->whiteNoResultProb = inputBuffers->valueResults[row * numValueChannels + 2];
+
+    //As above, these are NOT actually from white's perspective, but rather the player to move.
+    //As usual the client does the postprocessing.
+
+    if(output->whiteOwnerMap != NULL) {
+      assert(gpuHandle->model->numOwnershipChannels == 1);
+      std::copy(
+        inputBuffers->ownershipResults + row * nnXLen * nnYLen,
+        inputBuffers->ownershipResults + (row+1) * nnXLen * nnYLen,
+        output->whiteOwnerMap
+      );
+
+      if(output->midLayerFeatures == NULL) {
+        output->midLayerFeatures = new float[featureDim];
+      }
+
+      float norm = 0;
+      for(int i=0;i<midLayerFeatureSize;i++){
+        norm += pow(midLayerFeatureOutput[(row * midLayerFeatureSize + i)], 2.0);
+      }
+      norm = sqrt(norm);
+
+      for(int i=0;i<midLayerFeatureSize;i++){
+        midLayerFeatureOutput[(row * midLayerFeatureSize + i)] /= norm;
+      }
+
+      FeatureHashing(midLayerFeatureOutput + (row * midLayerFeatureSize), output->midLayerFeatures, midLayerFeatureSize, featureDim);
+
+    }
+
+    if(version >= 8) {
+      int numScoreValueChannels = gpuHandle->model->numScoreValueChannels;
+      assert(numScoreValueChannels == 4);
+      output->whiteScoreMean = inputBuffers->scoreValueResults[row * numScoreValueChannels];
+      output->whiteScoreMeanSq = inputBuffers->scoreValueResults[row * numScoreValueChannels + 1];
+      output->whiteLead = inputBuffers->scoreValueResults[row * numScoreValueChannels + 2];
+      output->varTimeLeft = inputBuffers->scoreValueResults[row * numScoreValueChannels + 3];
+    }
+    else if(version >= 4) {
+      int numScoreValueChannels = gpuHandle->model->numScoreValueChannels;
+      assert(numScoreValueChannels == 2);
+      output->whiteScoreMean = inputBuffers->scoreValueResults[row * numScoreValueChannels];
+      output->whiteScoreMeanSq = inputBuffers->scoreValueResults[row * numScoreValueChannels + 1];
+      output->whiteLead = output->whiteScoreMean;
+      output->varTimeLeft = 0;
+    }
+    else if(version >= 3) {
+      int numScoreValueChannels = gpuHandle->model->numScoreValueChannels;
+      assert(numScoreValueChannels == 1);
+      output->whiteScoreMean = inputBuffers->scoreValueResults[row * numScoreValueChannels];
+      //Version 3 neural nets don't have any second moment output, implicitly already folding it in, so we just use the mean squared
+      output->whiteScoreMeanSq = output->whiteScoreMean * output->whiteScoreMean;
+      output->whiteLead = output->whiteScoreMean;
+      output->varTimeLeft = 0;
+    }
+    else {
+      ASSERT_UNREACHABLE;
+    }
+  }
+  delete[] midLayerFeatureOutput;
+}
 
 bool NeuralNet::testEvaluateConv(
   const ConvLayerDesc* desc,

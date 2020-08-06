@@ -91,6 +91,7 @@ struct SearchParams {
   double tau;
   uint64_t aggregator;
   double gamma;
+  uint64_t featureDim;
 
   SearchParams();
   ~SearchParams();

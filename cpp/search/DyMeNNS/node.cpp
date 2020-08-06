@@ -8,18 +8,19 @@ MemoryNodeStats::MemoryNodeStats()
 MemoryNodeStats::~MemoryNodeStats()
 {}
 
-Node::Node(Hash128 hash_, float* features, int featureSize, MemoryNodeStats stats_){
+Node::Node(Hash128 hash_, float* features, int featureSize, MemoryNodeStats* stats_){
 	this->hash = hash_;
 	this->featureSize = featureSize;
 	this->feature = (float*) malloc(featureSize * sizeof(float));
 	copy(features, features + featureSize, this->feature);
-	this->stats.winProb = stats_.winProb;
-	this->stats.noResultProb = stats_.noResultProb;
-	this->stats.scoreMean = stats_.scoreMean;
-	this->stats.scoreMeanSq = stats_.scoreMeanSq;
-	this->stats.lead = stats_.lead;
-	this->stats.utility = stats_.utility;
-	this->stats.visits = stats_.visits;
+	this->stats = new MemoryNodeStats();
+	this->stats->winProb = stats_->winProb;
+	this->stats->noResultProb = stats_->noResultProb;
+	this->stats->scoreMean = stats_->scoreMean;
+	this->stats->scoreMeanSq = stats_->scoreMeanSq;
+	this->stats->lead = stats_->lead;
+	this->stats->utility = stats_->utility;
+	this->stats->visits = stats_->visits;
 }
 
 Node::~Node(){
@@ -27,14 +28,18 @@ Node::~Node(){
 		free(this->feature);
 		this->feature = NULL;
 	}
+	if(this->stats != NULL){
+		delete this->stats;
+		this->stats = NULL;
+	}
 }
 
 void Node::printStats(){
-	cout << "winProb: " << this->stats.winProb << endl;
-	cout << "noResultProb: " << this->stats.noResultProb << endl;
-	cout << "scoreMean: " << this->stats.scoreMean << endl;
-	cout << "scoreMeanSq: " << this->stats.scoreMeanSq << endl;
-	cout << "lead: " << this->stats.lead << endl;
-	cout << "utility: " << this->stats.utility << endl;
-	cout << "visits: " << this->stats.visits << endl;
+	cout << "winProb: " << this->stats->winProb << endl;
+	cout << "noResultProb: " << this->stats->noResultProb << endl;
+	cout << "scoreMean: " << this->stats->scoreMean << endl;
+	cout << "scoreMeanSq: " << this->stats->scoreMeanSq << endl;
+	cout << "lead: " << this->stats->lead << endl;
+	cout << "utility: " << this->stats->utility << endl;
+	cout << "visits: " << this->stats->visits << endl;
 }

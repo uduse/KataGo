@@ -101,9 +101,6 @@ bool Search::getPlaySelectionValuesAlreadyLocked(
       node.statsLock.clear(std::memory_order_release);
       assert(weightSum > 0.0);
       parentUtility = utilitySum / weightSum;
-      if(memoryUpdateSchema == 1) {
-        parentUtility = mergeMemoryValue(utilitySum, memUtilitySum, nodeLambda) / weightSum;
-      }
     }
 
     bool isDuringSearch = false;
@@ -271,11 +268,6 @@ void Search::getSelfUtilityLCBAndRadius(const SearchNode& parent, const SearchNo
 
   double utilityNoBonus = utilitySum / weightSum;
 
-  if(memoryUpdateSchema == 1) {
-    utilityNoBonus = mergeMemoryValue(utilitySum, memUtilitySum, nodeLambda) / weightSum;
-    utilitySqSum = mergeMemoryValue(utilitySqSum, memUtilitySqSum, nodeLambda);
-  }
-
   double endingScoreBonus = getEndingWhiteScoreBonus(parent,child);
   double utilityDiff = getScoreUtilityDiff(scoreMeanSum, scoreMeanSqSum, weightSum, endingScoreBonus);
   double utilityWithBonus = utilityNoBonus + utilityDiff;
@@ -394,10 +386,6 @@ bool Search::getNodeValues(const SearchNode& node, ReportedSearchValues& values)
   values.lead = leadSum / weightSum;
   values.utility = utilitySum / weightSum;
 
-  if(memoryUpdateSchema == 1) {
-    values.utility = mergeMemoryValue(utilitySum, memUtilitySum, nodeLambda) / weightSum;
-  }
-
   //Perform a little normalization - due to tiny floating point errors, winValue and lossValue could be outside [0,1].
   //(particularly lossValue, as it was produced by subtractions from weightSum that could have lost precision).
   if(values.winValue < 0.0) values.winValue = 0.0;
@@ -487,10 +475,6 @@ bool Search::shouldSuppressPassAlreadyLocked(const SearchNode* n) const {
       return false;
     passNumVisits = numVisits;
     passUtility = utilitySum / weightSum;
-    
-    if(memoryUpdateSchema == 1) {
-      passUtility = mergeMemoryValue(utilitySum, memUtilitySum, nodeLambda) / weightSum;
-    }
 
     passScoreMean = scoreMeanSum / weightSum;
     passLead = leadSum / weightSum;
@@ -537,10 +521,6 @@ bool Search::shouldSuppressPassAlreadyLocked(const SearchNode* n) const {
       continue;
 
     double utility = utilitySum / weightSum;
-
-    if(memoryUpdateSchema == 1) {
-      utility = mergeMemoryValue(utilitySum, memUtilitySum, nodeLambda) / weightSum;
-    }
 
     double scoreMean = scoreMeanSum / weightSum;
     double lead = leadSum / weightSum;
@@ -673,10 +653,6 @@ void Search::printRootEndingScoreValueBonus(ostream& out) const {
     child->statsLock.clear(std::memory_order_release);
 
     double utilityNoBonus = utilitySum / weightSum;
-
-    if(memoryUpdateSchema == 1) {
-      utilityNoBonus = mergeMemoryValue(utilitySum, memUtilitySum, nodeLambda) / weightSum;
-    }
 
     double endingScoreBonus = getEndingWhiteScoreBonus(*rootNode,child);
     double utilityDiff = getScoreUtilityDiff(scoreMeanSum, scoreMeanSqSum, weightSum, endingScoreBonus);
@@ -820,10 +796,6 @@ AnalysisData Search::getAnalysisDataOfSingleChild(
     double lead = leadSum / weightSum;
 
     data.utility = utilitySum / weightSum;
-
-    if(memoryUpdateSchema == 1) {
-      data.utility = mergeMemoryValue(utilitySum, memUtilitySum, nodeLambda) / weightSum;
-    }
 
     data.resultUtility = getResultUtility(winValue, noResultValue);
     data.scoreUtility = data.utility - data.resultUtility;
@@ -1121,10 +1093,6 @@ void Search::printTreeHelper(
       double nodeLambda = node.stats.nodeLambda;
       double utilitySqSum = node.stats.utilitySqSum;
       double memUtilitySqSum = node.stats.memoryUtilitySqSum;
-
-      if(memoryUpdateSchema == 1) {
-        utilitySqSum = mergeMemoryValue(utilitySqSum, memUtilitySqSum, nodeLambda);
-      }
 
       double weightSum = node.stats.weightSum;
       double weightSqSum = node.stats.weightSqSum;

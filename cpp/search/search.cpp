@@ -1709,7 +1709,7 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
           scoreMeanSq = mergeMemoryValue(scoreMeanSq, query.scoreMeanSq, weightedLambda);
         }
         // memoryPtr->update(hash, whiteOwnerMapFeature, stats);
-        memoryPtr->update(hash, midLayerFeatures, stats);
+        // memoryPtr->update(hash, midLayerFeatures, stats);
         delete stats;
       }
     }
@@ -1731,7 +1731,7 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
           auto query = memoryPtr->query(midLayerFeatures);
           utility = mergeMemoryValue(utility, query.utility, weightedLambda);
         }
-        memoryPtr->update(hash, midLayerFeatures, stats);
+        // memoryPtr->update(hash, midLayerFeatures, stats);
         delete stats;
       }
     }
@@ -1750,7 +1750,7 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
         MemoryNodeStats* stats = new MemoryNodeStats();
         stats->utility = utility;
         stats->visits = numVisitsToAdd;
-        memoryPtr->update(hash, midLayerFeatures, stats);
+        // memoryPtr->update(hash, midLayerFeatures, stats);
         delete stats;
       } 
     }
@@ -1767,7 +1767,7 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
         MemoryNodeStats* stats = new MemoryNodeStats();
         stats->utility = utility;
         stats->visits = numVisitsToAdd;
-        memoryPtr->update(hash, midLayerFeatures, stats);
+        // memoryPtr->update(hash, midLayerFeatures, stats);
         delete stats;
       }
     }
@@ -1845,12 +1845,7 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
   double nodeLambda = node.stats.nodeLambda;
   if (memoryUpdateSchema == 3 && node.nnOutput != nullptr) {
     Hash128 &hash = node.nnOutput->nnHash;
-    // float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
-    // if (whiteOwnerMapFeature) {
     float* midLayerFeatures = node.nnOutput->midLayerFeatures;
-
-
-
     if (midLayerFeatures) {
       MemoryNodeStats* stats = new MemoryNodeStats();
       stats->winProb = winValue;
@@ -1875,25 +1870,17 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
     getResultUtility(winValue, noResultValue)
     + getScoreUtility(scoreMean, scoreMeanSq, 1.0);
 
-  // cout << "utility: " << utility << endl;
-
   if (memoryUpdateSchema == 0 && node.nnOutput != nullptr) {
     Hash128 &hash = node.nnOutput->nnHash;
-    // float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
-    // if (whiteOwnerMapFeature) {
-    
+
     float* midLayerFeatures = node.nnOutput->midLayerFeatures;
     
     if (midLayerFeatures) {
-    // float max = *(max_element(midLayerFeatures, midLayerFeatures + 15552));
-    // cout << max << endl;
       MemoryNodeStats* stats = new MemoryNodeStats();
       stats->utility = utility;
       stats->visits = 1;
       if (useMemory && (memoryPtr->memArray.size() >= memoryPtr->numNeighbors)) {
         auto query = memoryPtr->query(midLayerFeatures);
-        // cout << utility << " " << query.utility << endl;
-        // cout << "numVisits: " << query.visits << endl;
         utility = mergeMemoryValue(utility, query.utility, nodeLambda);
       }
       memoryPtr->update(hash, midLayerFeatures, stats);
@@ -1901,15 +1888,10 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
     }
   }
 
-  // memoryPtr->printMemory();
-
   if (memoryUpdateSchema == 1 && node.nnOutput != nullptr) {
     Hash128 &hash = node.nnOutput->nnHash;
-    // float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
-    // if (whiteOwnerMapFeature) {
     float* midLayerFeatures = node.nnOutput->midLayerFeatures;
     if (midLayerFeatures) {
-      // We need to use this memory even in terminal state that is why we removed useMemory
       if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
         auto queryResult = memoryPtr->query(midLayerFeatures);
         double memUtility = queryResult.utility;
@@ -1928,8 +1910,6 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
     Hash128 &hash = node.nnOutput->nnHash;
     float* midLayerFeatures = node.nnOutput->midLayerFeatures;
     if (midLayerFeatures) {
-    // float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
-    // if (whiteOwnerMapFeature) {
       // We need to use this memory even in terminal state that is why we removed useMemory
       if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
         auto queryResult = memoryPtr->query(midLayerFeatures);

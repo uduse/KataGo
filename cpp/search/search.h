@@ -399,7 +399,7 @@ private:
     bool isRoot
   ) const;
 
-  void addLeafValue(SearchNode &node, double winValue, double noResultValue, double scoreMean, double scoreMeanSq, double lead, int32_t virtualLossesToSubtract, bool useMemory);
+  void addLeafValue(SearchNode &node, double winValue, double noResultValue, double scoreMean, double scoreMeanSq, double lead, int32_t virtualLossesToSubtract, bool useMemory, SearchThread& thread);
 
   void maybeRecomputeExistingNNOutput(
     SearchThread& thread, SearchNode& node, bool isRoot

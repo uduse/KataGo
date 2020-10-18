@@ -1840,11 +1840,14 @@ void Search::runSinglePlayout(SearchThread& thread) {
   thread.history = rootHistory;
 }
 
-void Search::addLeafValue(SearchNode &node, double winValue, double noResultValue, double scoreMean, double scoreMeanSq, double lead, int32_t virtualLossesToSubtract, bool useMemory) {
+void Search::addLeafValue(SearchNode &node, double winValue, double noResultValue, double scoreMean, double scoreMeanSq, double lead, int32_t virtualLossesToSubtract, bool useMemory, SearchThread& thread) {
+  // cout << thread.board.toStringSimple(thread.board, '\n') << endl;
+  // cout << thread.board.pos_hash << endl;
   node.stats.nodeLambda = memoryLambda;
   double nodeLambda = node.stats.nodeLambda;
   if (memoryUpdateSchema == 3 && node.nnOutput != nullptr) {
-    Hash128 &hash = node.nnOutput->nnHash;
+    // Hash128 &hash = node.nnOutput->nnHash;
+    Hash128 &hash = thread.board.pos_hash;
     float* midLayerFeatures = node.nnOutput->midLayerFeatures;
     if (midLayerFeatures) {
       MemoryNodeStats* stats = new MemoryNodeStats();
@@ -1871,8 +1874,8 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
     + getScoreUtility(scoreMean, scoreMeanSq, 1.0);
 
   if (memoryUpdateSchema == 0 && node.nnOutput != nullptr) {
-    Hash128 &hash = node.nnOutput->nnHash;
-
+    // Hash128 &hash = node.nnOutput->nnHash;
+    Hash128 &hash = thread.board.pos_hash;
     float* midLayerFeatures = node.nnOutput->midLayerFeatures;
     
     if (midLayerFeatures) {
@@ -1889,7 +1892,8 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
   }
 
   if (memoryUpdateSchema == 1 && node.nnOutput != nullptr) {
-    Hash128 &hash = node.nnOutput->nnHash;
+    // Hash128 &hash = node.nnOutput->nnHash;
+    Hash128 &hash = thread.board.pos_hash;
     float* midLayerFeatures = node.nnOutput->midLayerFeatures;
     if (midLayerFeatures) {
       if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
@@ -1907,7 +1911,8 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
   }
 
   if (memoryUpdateSchema == 2 && node.nnOutput != nullptr) {
-    Hash128 &hash = node.nnOutput->nnHash;
+    // Hash128 &hash = node.nnOutput->nnHash;
+    Hash128 &hash = thread.board.pos_hash;
     float* midLayerFeatures = node.nnOutput->midLayerFeatures;
     if (midLayerFeatures) {
       // We need to use this memory even in terminal state that is why we removed useMemory
@@ -2023,7 +2028,7 @@ void Search::initNodeNNOutput(
   double scoreMeanSq = (double)node.nnOutput->whiteScoreMeanSq;
   double lead = (double)node.nnOutput->whiteLead;
 
-  addLeafValue(node, winProb, noResultProb, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract, true);
+  addLeafValue(node, winProb, noResultProb, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract, true, thread);
 }
 
 void Search::playoutDescend(
@@ -2049,7 +2054,7 @@ void Search::playoutDescend(
       double scoreMean = 0.0;
       double scoreMeanSq = 0.0;
       double lead = 0.0;
-      addLeafValue(node, winValue, noResultValue, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract, false);
+      addLeafValue(node, winValue, noResultValue, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract, false, thread);
       return;
     }
     else {
@@ -2058,7 +2063,7 @@ void Search::playoutDescend(
       double scoreMean = ScoreValue::whiteScoreDrawAdjust(thread.history.finalWhiteMinusBlackScore,searchParams.drawEquivalentWinsForWhite,thread.history);
       double scoreMeanSq = ScoreValue::whiteScoreMeanSqOfScoreGridded(thread.history.finalWhiteMinusBlackScore,searchParams.drawEquivalentWinsForWhite);
       double lead = scoreMean;
-      addLeafValue(node, winValue, noResultValue, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract, false);
+      addLeafValue(node, winValue, noResultValue, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract, false, thread);
       return;
     }
   }

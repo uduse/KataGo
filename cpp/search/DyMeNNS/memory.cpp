@@ -54,8 +54,7 @@ void Memory::update(Hash128 hash, float* featureVector, MemoryNodeStats* stats){
 	if(memArray.size() < this->memorySize){
 		for(int i=0;i<memArray.size();i++){
 			if(memArray[i]->hash == hash){
-				int existingVisits = memArray[i]->stats->visits;
-				int newVisits = newNode->stats->visits;
+                // cout << "Monte Carlo Update Happening?" << endl;
 				newNode->stats->visits += memArray[i]->stats->visits;
 				newNode->stats->winProb = memArray[i]->stats->winProb + ((newNode->stats->winProb - memArray[i]->stats->winProb) / newNode->stats->visits);
 				newNode->stats->noResultProb = memArray[i]->stats->noResultProb + ((newNode->stats->noResultProb - memArray[i]->stats->noResultProb) / newNode->stats->visits);
@@ -80,8 +79,6 @@ void Memory::update(Hash128 hash, float* featureVector, MemoryNodeStats* stats){
 		for(int i=0; i < this->memorySize; i++){
 			if(memArray[i]->hash == hash){
 				isPresent = true;
-				int existingVisits = memArray[i]->stats->visits;
-				int newVisits = newNode->stats->visits;
 				newNode->stats->visits += memArray[i]->stats->visits;
 				newNode->stats->winProb = memArray[i]->stats->winProb + ((newNode->stats->winProb - memArray[i]->stats->winProb) / newNode->stats->visits);
 				newNode->stats->noResultProb = memArray[i]->stats->noResultProb + ((newNode->stats->noResultProb - memArray[i]->stats->noResultProb) / newNode->stats->visits);
@@ -101,7 +98,7 @@ void Memory::update(Hash128 hash, float* featureVector, MemoryNodeStats* stats){
 			if(memArray[0]->feature != NULL){
 				free(memArray[0]->feature);
 				memArray[0]->feature = NULL;
-			}	
+			}
 			memArray.erase(memArray.begin());
 		}
 		memArray.push_back(newNode);

@@ -116,7 +116,18 @@ MemoryNodeStats Memory::query(float* featureVector){
 			top_neighbours.pop();
 		}
 	}
+/*
+	priority_queue<pair<double, int> > temp_top_neighbours = top_neighbours;
+	for(int i =0;i<this->numNeighbors;i++){
+		pair<double, int> result = top_neighbours.top();
+		cout << "(" << result.first << ", " << result.second << ") ";
+		top_neighbours.pop();
+	}
 
+	cout << endl;
+
+
+*/
 	int index;
 	MemoryNodeStats stats = MemoryNodeStats();
 	double weight = 0;
@@ -134,7 +145,7 @@ MemoryNodeStats Memory::query(float* featureVector){
 		}
 
 		if(this->aggregator == weighted_softmax){
-			weight = memArray[index]->stats->visits * exp(-(1 + result.first)/this->tau);
+			weight = memArray[index]->stats->visits * exp(-(result.first)/this->tau);
 			weightSum += weight;
 		}
 

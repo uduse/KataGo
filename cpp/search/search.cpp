@@ -1518,6 +1518,8 @@ void Search::updateStatsAfterPlayout(SearchNode& node, SearchThread& thread, int
 //are updated in the manner specified.
 //Assumes this node has an nnOutput
 void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numVisitsToAdd, int32_t virtualLossesToSubtract, bool isRoot) {
+  // cout << "internal node" << endl;
+  // cout << "isRoot: " << isRoot << endl;
   //Find all children and compute weighting of the children based on their values
   vector<double>& weightFactors = thread.weightFactorBuf;
   vector<double>& winValues = thread.winValuesBuf;
@@ -1541,9 +1543,9 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
   int numChildren = node.numChildren;
   int numGoodChildren = 0;
 
-  double memUtilitySums[numChildren];
-  double memUtilitySqSums[numChildren];
-  double childLambda[numChildren];
+  // double memUtilitySums[numChildren];
+  // double memUtilitySqSums[numChildren];
+  // double childLambda[numChildren];
 
   for(int i = 0; i<numChildren; i++) {
     const SearchNode* child = node.children[i];
@@ -1560,9 +1562,9 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
     double utilitySum = child->stats.utilitySum;
     double utilitySqSum = child->stats.utilitySqSum;
 
-    double nodeLambda = child->stats.nodeLambda;
-    double memUtilitySum = child->stats.memoryUtilitySum;
-    double memUtilitySqSum = child->stats.memoryUtilitySqSum;
+    // double nodeLambda = child->stats.nodeLambda;
+    // double memUtilitySum = child->stats.memoryUtilitySum;
+    // double memUtilitySqSum = child->stats.memoryUtilitySqSum;
 
     child->statsLock.clear(std::memory_order_release);
 
@@ -1571,16 +1573,6 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
     assert(weightSum > 0.0);
 
     double childUtility = utilitySum / weightSum;
-
-    if(memoryUpdateSchema == 1) {
-      childUtility = mergeMemoryValue(utilitySum, memUtilitySum, nodeLambda) / weightSum;
-      memUtilitySums[numGoodChildren] = memUtilitySum;
-      memUtilitySqSums[numGoodChildren] = memUtilitySqSum;    
-    }
-
-    if(memoryUpdateSchema == 2) {
-      memUtilitySums[numGoodChildren] = memUtilitySum;
-    }
 
     winValues[numGoodChildren] = winValueSum / weightSum;
     noResultValues[numGoodChildren] = noResultValueSum / weightSum;
@@ -1594,8 +1586,7 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
     weightSqSums[numGoodChildren] = weightSqSum;
     visits[numGoodChildren] = childVisits;
     totalChildVisits += childVisits;
-    // weightedLambda += 0.9 * nodeLambda;
-    childLambda[numGoodChildren] = nodeLambda;
+    // childLambda[numGoodChildren] = nodeLambda;
 
     if(childVisits > maxChildVisits)
       maxChildVisits = childVisits;
@@ -1631,8 +1622,8 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
   double weightSum = 0.0;
   double weightSqSum = 0.0;
 
-  double memUtilitySum = 0.0;
-  double memUtilitySqSum = 0.0;
+  // double memUtilitySum = 0.0;
+  // double memUtilitySqSum = 0.0;
   double weightedLambda = 0.0;
   for(int i = 0; i<numGoodChildren; i++) {
     if(visits[i] < amountToPrune)
@@ -1653,7 +1644,7 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
     leadSum += desiredWeight * leads[i];
     utilitySum += weightScaling * utilitySums[i];
 
-    if(memoryUpdateSchema == 1) {
+/*    if(memoryUpdateSchema == 1) {
       memUtilitySum += weightScaling * memUtilitySums[i];
       memUtilitySqSum += weightScaling * memUtilitySqSums[i];
     }
@@ -1661,16 +1652,15 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
     if(memoryUpdateSchema == 2) {
       memUtilitySum += weightScaling * memUtilitySums[i];
     }
-
+*/
     utilitySqSum += weightScaling * utilitySqSums[i];
     weightSum += desiredWeight;
     weightSqSum += weightScaling * weightScaling * weightSqSums[i];
 
-    weightedLambda += childLambda[i];
+    // weightedLambda += childLambda[i];
   }
 
-  weightedLambda *= (gamma / numGoodChildren);
-  // cout << "weightedLambda: " << weightedLambda << endl; 
+  // weightedLambda *= (gamma / numGoodChildren);
 
   //Also add in the direct evaluation of this node.
   {
@@ -1687,33 +1677,6 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
     double scoreMeanSq = (double)node.nnOutput->whiteScoreMeanSq;
     double lead = (double)node.nnOutput->whiteLead;
 
-    if (memoryUpdateSchema == 3 && node.nnOutput != nullptr) {
-      Hash128 &hash = node.nnOutput->nnHash;
-      // float* whiteOwnerMapFeature = node.nnOutput->whiteOwnerMap;
-      float* midLayerFeatures = node.nnOutput->midLayerFeatures;
-      // if (whiteOwnerMapFeature) {
-      if (midLayerFeatures) {
-        MemoryNodeStats* stats = new MemoryNodeStats();
-        stats->winProb = winProb;
-        stats->noResultProb = noResultProb;
-        stats->scoreMean = scoreMean;
-        stats->scoreMeanSq = scoreMeanSq;
-        stats->lead = lead;
-        stats->visits = numVisitsToAdd;
-        if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
-          auto query = memoryPtr->query(midLayerFeatures);
-          lead = mergeMemoryValue(lead, query.lead, weightedLambda);
-          scoreMean = mergeMemoryValue(scoreMean, query.scoreMean, weightedLambda);
-          noResultProb = mergeMemoryValue(noResultProb, query.noResultProb, weightedLambda);
-          winProb = mergeMemoryValue(winProb, query.winProb, weightedLambda);
-          scoreMeanSq = mergeMemoryValue(scoreMeanSq, query.scoreMeanSq, weightedLambda);
-        }
-        // memoryPtr->update(hash, whiteOwnerMapFeature, stats);
-        // memoryPtr->update(hash, midLayerFeatures, stats);
-        delete stats;
-      }
-    }
-
     double utility =
       getResultUtility(winProb, noResultProb)
       + getScoreUtility(scoreMean, scoreMeanSq, 1.0);
@@ -1721,53 +1684,18 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
     
     if (memoryUpdateSchema == 0 && node.nnOutput != nullptr) {
       Hash128 &hash = node.nnOutput->nnHash;
+      // Hash128 &hash = thread.board.pos_hash;
       float* midLayerFeatures = node.nnOutput->midLayerFeatures;
       if (midLayerFeatures) {
-
         MemoryNodeStats* stats = new MemoryNodeStats();
         stats->utility = utility;
         stats->visits = numVisitsToAdd;
         if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
           auto query = memoryPtr->query(midLayerFeatures);
-          utility = mergeMemoryValue(utility, query.utility, weightedLambda);
+          // utility = mergeMemoryValue(utility, query.utility, weightedLambda);
+          utility = mergeMemoryValue(utility, query.utility, 0.2);
         }
-        // memoryPtr->update(hash, midLayerFeatures, stats);
-        delete stats;
-      }
-    }
-
-    if (memoryUpdateSchema == 1 && node.nnOutput != nullptr) {
-      Hash128 &hash = node.nnOutput->nnHash;
-      float* midLayerFeatures = node.nnOutput->midLayerFeatures;
-      if (midLayerFeatures) {
-        if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
-          auto queryResult = memoryPtr->query(midLayerFeatures);
-          double memUtility = queryResult.utility;
-          memUtilitySum += memUtility * desiredWeight;
-          memUtilitySqSum += memUtility * memUtility * desiredWeight;
-        }
-
-        MemoryNodeStats* stats = new MemoryNodeStats();
-        stats->utility = utility;
-        stats->visits = numVisitsToAdd;
-        // memoryPtr->update(hash, midLayerFeatures, stats);
-        delete stats;
-      } 
-    }
-
-    if (memoryUpdateSchema == 2 && node.nnOutput != nullptr) {
-      Hash128 &hash = node.nnOutput->nnHash;
-      
-      float* midLayerFeatures = node.nnOutput->midLayerFeatures;
-      if (midLayerFeatures) {
-        if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
-          auto queryResult = memoryPtr->query(midLayerFeatures);
-          memUtilitySum += queryResult.utility * desiredWeight;
-        }
-        MemoryNodeStats* stats = new MemoryNodeStats();
-        stats->utility = utility;
-        stats->visits = numVisitsToAdd;
-        // memoryPtr->update(hash, midLayerFeatures, stats);
+        memoryPtr->update(hash, midLayerFeatures, stats);
         delete stats;
       }
     }
@@ -1783,22 +1711,6 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
     weightSqSum += desiredWeight * desiredWeight;
   }
 
-  {
-    // Method 2
-    if (memoryUpdateSchema == 2) {
-      double utilityAvgBeforeMemory = utilitySum / weightSum;
-      double utilitySqAvgBeforeMemory = utilitySqSum / weightSum;
-
-      double varianceAvgBeforeMemory = utilitySqAvgBeforeMemory - (utilityAvgBeforeMemory * utilityAvgBeforeMemory);
-      double utilityAvgMemory = memUtilitySum / weightSum;
-      double utilityAvgAfterMemory = mergeMemoryValue(utilityAvgBeforeMemory, utilityAvgMemory, weightedLambda);
-
-      double utilitySqAvgAfterMemory = varianceAvgBeforeMemory + (utilityAvgAfterMemory * utilityAvgAfterMemory);
-
-      utilitySum = utilityAvgAfterMemory * weightSum;
-      utilitySqSum = utilitySqAvgAfterMemory * weightSum;
-    }
-  }
 
   while(node.statsLock.test_and_set(std::memory_order_acquire));
   node.stats.visits += numVisitsToAdd;
@@ -1814,16 +1726,6 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
   node.stats.utilitySum = utilitySum;
   node.stats.utilitySqSum = utilitySqSum;
   node.stats.nodeLambda = weightedLambda;
-
-  if (memoryUpdateSchema == 1) {
-    node.stats.memoryUtilitySum = memUtilitySum;
-    node.stats.memoryUtilitySqSum = memUtilitySqSum;
-  }
-
-  if (memoryUpdateSchema == 2) {
-    node.stats.memoryUtilitySum = memUtilitySum;
-  }
-
   node.stats.weightSum = weightSum;
   node.stats.weightSqSum = weightSqSum;
   node.virtualLosses -= virtualLossesToSubtract;
@@ -1840,42 +1742,19 @@ void Search::runSinglePlayout(SearchThread& thread) {
   thread.history = rootHistory;
 }
 
-void Search::addLeafValue(SearchNode &node, double winValue, double noResultValue, double scoreMean, double scoreMeanSq, double lead, int32_t virtualLossesToSubtract, bool useMemory, SearchThread& thread) {
+void Search::addLeafValue(SearchNode &node, double winValue, double noResultValue, double scoreMean, double scoreMeanSq, double lead, int32_t virtualLossesToSubtract, bool useMemory) {
   // cout << thread.board.toStringSimple(thread.board, '\n') << endl;
   // cout << thread.board.pos_hash << endl;
-  node.stats.nodeLambda = memoryLambda;
-  double nodeLambda = node.stats.nodeLambda;
-  if (memoryUpdateSchema == 3 && node.nnOutput != nullptr) {
-    // Hash128 &hash = node.nnOutput->nnHash;
-    Hash128 &hash = thread.board.pos_hash;
-    float* midLayerFeatures = node.nnOutput->midLayerFeatures;
-    if (midLayerFeatures) {
-      MemoryNodeStats* stats = new MemoryNodeStats();
-      stats->winProb = winValue;
-      stats->noResultProb = noResultValue;
-      stats->scoreMean = scoreMean;
-      stats->scoreMeanSq = scoreMeanSq;
-      stats->lead = lead;
-      stats->visits = 1;
-      if (useMemory && (memoryPtr->memArray.size() >= memoryPtr->numNeighbors)) {
-        auto query = memoryPtr->query(midLayerFeatures);
-        lead = mergeMemoryValue(lead, query.lead, nodeLambda);
-        scoreMean = mergeMemoryValue(scoreMean, query.scoreMean, nodeLambda);
-        noResultValue = mergeMemoryValue(noResultValue, query.noResultProb, nodeLambda);
-        winValue = mergeMemoryValue(winValue, query.winProb, nodeLambda);
-        scoreMeanSq = mergeMemoryValue(scoreMeanSq, query.scoreMeanSq, nodeLambda);
-      }
-      memoryPtr->update(hash, midLayerFeatures, stats);
-    }
-  }
-
+  // cout << "leaf value" << endl;
+  // node.stats.nodeLambda = memoryLambda;
+  // double nodeLambda = node.stats.nodeLambda;
+  
   double utility =
     getResultUtility(winValue, noResultValue)
     + getScoreUtility(scoreMean, scoreMeanSq, 1.0);
 
   if (memoryUpdateSchema == 0 && node.nnOutput != nullptr) {
-    // Hash128 &hash = node.nnOutput->nnHash;
-    Hash128 &hash = thread.board.pos_hash;
+    Hash128 &hash = node.nnOutput->nnHash;
     float* midLayerFeatures = node.nnOutput->midLayerFeatures;
     
     if (midLayerFeatures) {
@@ -1884,45 +1763,9 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
       stats->visits = 1;
       if (useMemory && (memoryPtr->memArray.size() >= memoryPtr->numNeighbors)) {
         auto query = memoryPtr->query(midLayerFeatures);
-        utility = mergeMemoryValue(utility, query.utility, nodeLambda);
+        // utility = mergeMemoryValue(utility, query.utility, nodeLambda);
+        utility = mergeMemoryValue(utility, query.utility, 0.2);
       }
-      memoryPtr->update(hash, midLayerFeatures, stats);
-      delete stats;
-    }
-  }
-
-  if (memoryUpdateSchema == 1 && node.nnOutput != nullptr) {
-    // Hash128 &hash = node.nnOutput->nnHash;
-    Hash128 &hash = thread.board.pos_hash;
-    float* midLayerFeatures = node.nnOutput->midLayerFeatures;
-    if (midLayerFeatures) {
-      if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
-        auto queryResult = memoryPtr->query(midLayerFeatures);
-        double memUtility = queryResult.utility;
-        node.stats.memoryUtilitySum += memUtility;
-        node.stats.memoryUtilitySqSum += memUtility * memUtility;
-      }
-      MemoryNodeStats* stats = new MemoryNodeStats();
-      stats->utility = utility;
-      stats->visits = 1;
-      memoryPtr->update(hash, midLayerFeatures, stats);
-      delete stats;
-    }
-  }
-
-  if (memoryUpdateSchema == 2 && node.nnOutput != nullptr) {
-    // Hash128 &hash = node.nnOutput->nnHash;
-    Hash128 &hash = thread.board.pos_hash;
-    float* midLayerFeatures = node.nnOutput->midLayerFeatures;
-    if (midLayerFeatures) {
-      // We need to use this memory even in terminal state that is why we removed useMemory
-      if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
-        auto queryResult = memoryPtr->query(midLayerFeatures);
-        node.stats.memoryUtilitySum += queryResult.utility;
-      }
-      MemoryNodeStats* stats = new MemoryNodeStats();
-      stats->utility = utility;
-      stats->visits = 1;
       memoryPtr->update(hash, midLayerFeatures, stats);
       delete stats;
     }
@@ -2028,7 +1871,7 @@ void Search::initNodeNNOutput(
   double scoreMeanSq = (double)node.nnOutput->whiteScoreMeanSq;
   double lead = (double)node.nnOutput->whiteLead;
 
-  addLeafValue(node, winProb, noResultProb, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract, true, thread);
+  addLeafValue(node, winProb, noResultProb, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract, true);
 }
 
 void Search::playoutDescend(
@@ -2054,7 +1897,7 @@ void Search::playoutDescend(
       double scoreMean = 0.0;
       double scoreMeanSq = 0.0;
       double lead = 0.0;
-      addLeafValue(node, winValue, noResultValue, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract, false, thread);
+      addLeafValue(node, winValue, noResultValue, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract, false);
       return;
     }
     else {
@@ -2063,7 +1906,7 @@ void Search::playoutDescend(
       double scoreMean = ScoreValue::whiteScoreDrawAdjust(thread.history.finalWhiteMinusBlackScore,searchParams.drawEquivalentWinsForWhite,thread.history);
       double scoreMeanSq = ScoreValue::whiteScoreMeanSqOfScoreGridded(thread.history.finalWhiteMinusBlackScore,searchParams.drawEquivalentWinsForWhite);
       double lead = scoreMean;
-      addLeafValue(node, winValue, noResultValue, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract, false, thread);
+      addLeafValue(node, winValue, noResultValue, scoreMean, scoreMeanSq, lead, virtualLossesToSubtract, false);
       return;
     }
   }

@@ -116,6 +116,7 @@ MemoryNodeStats Memory::query(float* featureVector){
 			top_neighbours.pop();
 		}
 	}
+
 /*
 	priority_queue<pair<double, int> > temp_top_neighbours = top_neighbours;
 	for(int i =0;i<this->numNeighbors;i++){
@@ -125,9 +126,8 @@ MemoryNodeStats Memory::query(float* featureVector){
 	}
 
 	cout << endl;
-
-
 */
+
 	int index;
 	MemoryNodeStats stats = MemoryNodeStats();
 	double weight = 0;

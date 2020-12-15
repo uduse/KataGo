@@ -1690,11 +1690,11 @@ void Search::recomputeNodeStats(SearchNode& node, SearchThread& thread, int numV
         MemoryNodeStats* stats = new MemoryNodeStats();
         stats->utility = utility;
         stats->visits = numVisitsToAdd;
-        if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
-          auto query = memoryPtr->query(midLayerFeatures);
-          // utility = mergeMemoryValue(utility, query.utility, weightedLambda);
-          utility = mergeMemoryValue(utility, query.utility, 0.2);
-        }
+        // if (memoryPtr->memArray.size() >= memoryPtr->numNeighbors) {
+        //   auto query = memoryPtr->query(midLayerFeatures);
+        //   // utility = mergeMemoryValue(utility, query.utility, weightedLambda);
+        //   utility = mergeMemoryValue(utility, query.utility, 0.2);
+        // }
         memoryPtr->update(hash, midLayerFeatures, stats);
         delete stats;
       }
@@ -1761,7 +1761,7 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
       MemoryNodeStats* stats = new MemoryNodeStats();
       stats->utility = utility;
       stats->visits = 1;
-      if (useMemory && (memoryPtr->memArray.size() >= memoryPtr->numNeighbors)) {
+      if (useMemory && (memoryPtr->memArray.size() >= (3 * memoryPtr->numNeighbors))) {
         auto query = memoryPtr->query(midLayerFeatures);
         // utility = mergeMemoryValue(utility, query.utility, nodeLambda);
         utility = mergeMemoryValue(utility, query.utility, 0.2);

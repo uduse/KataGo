@@ -1766,6 +1766,10 @@ void Search::addLeafValue(SearchNode &node, double winValue, double noResultValu
         // utility = mergeMemoryValue(utility, query.utility, nodeLambda);
         utility = mergeMemoryValue(utility, query.utility, 0.2);
       }
+      if(!useMemory){
+        cout << utility << endl;
+        cout << "Leaf Space" << endl;
+      }
       memoryPtr->update(hash, midLayerFeatures, stats);
       delete stats;
     }
